@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17324d">
+  <title>写真報告書メーカー</title>
+  
+  <style>
+
+:root{
+  color-scheme: light;
+  --bg:#f4f6f8;
+  --surface:#ffffff;
+  --ink:#17212b;
+  --muted:#65717d;
+  --line:#d9e0e6;
+  --accent:#17324d;
+  --accent-2:#2f6b8a;
+  --accent-soft:#e9f1f6;
+  --danger:#b42318;
+  --danger-soft:#feeceb;
+  --ok:#216e4a;
+  --ok-soft:#e9f6ef;
+  --shadow:0 8px 28px rgba(16,35,52,.08);
+  --radius:16px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app-header{
+  position:sticky; top:0; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; padding:14px max(16px,env(safe-area-inset-left)) 12px max(16px,env(safe-area-inset-right));
+  background:rgba(244,246,248,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.app-header h1{font-size:20px; margin:0}
+.eyebrow{font-size:11px; letter-spacing:.08em; color:var(--muted); margin-bottom:2px}
+.page{max-width:1040px;margin:0 auto;padding:20px 16px 56px}
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px; box-shadow:var(--shadow); margin-bottom:16px;
+}
+.card h2,.card h3{margin:0 0 12px}
+.hero{
+  display:grid; grid-template-columns:1.35fr .65fr; gap:16px; align-items:stretch;
+}
+.hero .card{margin:0}
+.hero-main{display:flex;flex-direction:column;justify-content:center;min-height:190px}
+.hero-main h2{font-size:28px;line-height:1.25;margin-bottom:8px}
+.hero-main p{color:var(--muted);margin:0 0 20px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.metric{display:grid;gap:10px;align-content:center}
+.metric-box{padding:14px;border:1px solid var(--line);border-radius:14px;background:#fafbfc}
+.metric-box strong{font-size:24px;display:block}
+.metric-box span{font-size:12px;color:var(--muted)}
+.primary-btn,.secondary-btn,.ghost-btn,.danger-btn,.small-btn{
+  border-radius:12px; border:1px solid transparent; min-height:44px; padding:10px 14px; font-weight:700;
+}
+.primary-btn{background:var(--accent);color:#fff}
+.secondary-btn{background:var(--accent-soft);color:var(--accent);border-color:#cbdce7}
+.ghost-btn{background:#fff;color:var(--ink);border-color:var(--line)}
+.danger-btn{background:var(--danger-soft);color:var(--danger);border-color:#f3c4c0}
+.small-btn{min-height:34px;padding:6px 10px;font-size:13px;background:#fff;border-color:var(--line)}
+.primary-btn:disabled,.secondary-btn:disabled{opacity:.45;cursor:not-allowed}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.field{display:grid;gap:6px}
+.field label,.field-label{font-size:13px;font-weight:700}
+.field input,.field select,.field textarea,select,input[type="text"],input[type="date"]{
+  width:100%; min-height:44px; border:1px solid var(--line); border-radius:10px; padding:9px 11px;
+  background:#fff; color:var(--ink);
+}
+.field textarea{min-height:86px;resize:vertical}
+.help{font-size:12px;color:var(--muted);line-height:1.55}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.section-title h2,.section-title h3{margin:0}
+.check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.check-item{
+  display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;
+}
+.check-item input{width:20px;height:20px}
+.list{display:grid;gap:10px}
+.report-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;
+}
+.report-row .meta{min-width:0}
+.report-row .title{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.report-row .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.stepper{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.step{
+  padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted);background:#fff;
+}
+.step.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.uploader{
+  border:2px dashed #b9c6d0;border-radius:16px;padding:20px;text-align:center;background:#fbfcfd;
+}
+.uploader input{display:none}
+.photo-toolbar{
+  display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin:12px 0;
+}
+.photo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.photo-card{
+  position:relative;border:2px solid transparent;border-radius:12px;overflow:hidden;background:#edf1f4;aspect-ratio:4/3;
+}
+.photo-card.selected{border-color:var(--accent)}
+.photo-card img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-card input{
+  position:absolute;left:8px;top:8px;width:22px;height:22px;z-index:2;
+  accent-color:var(--accent);filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));
+}
+.photo-card .badge{
+  position:absolute;right:7px;bottom:7px;padding:3px 7px;border-radius:999px;background:rgba(0,0,0,.62);color:white;font-size:10px;
+}
+.phase-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.phase-box{border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
+.phase-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.phase-head strong{font-size:14px}
+.phase-photo{
+  display:grid;grid-template-columns:92px 1fr;gap:10px;padding:8px 0;border-top:1px solid var(--line);align-items:center;
+}
+.phase-photo:first-of-type{border-top:0}
+.phase-photo img{width:92px;height:70px;object-fit:cover;border-radius:9px;background:#eef2f5}
+.phase-photo .controls{display:flex;gap:5px;flex-wrap:wrap}
+.empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.notice{padding:12px 14px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:13px;line-height:1.55}
+.notice.warn{background:#fff6e6;color:#7a4a00}
+.sticky-actions{
+  position:sticky;bottom:0;z-index:15;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;
+  padding:12px;margin:16px -8px -8px;background:rgba(244,246,248,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line);
+}
+.preview-shell{background:#dfe5ea;padding:14px;border-radius:14px;overflow:auto}
+.report-paper{
+  width:min(100%,794px);margin:0 auto;background:#fff;color:#111;padding:34px 34px 44px;box-shadow:0 4px 18px rgba(0,0,0,.1);
+}
+.report-paper .report-title{text-align:center;font-size:24px;font-weight:800;margin-bottom:16px}
+.report-info{display:grid;grid-template-columns:1fr 1fr;border:1px solid #444;margin-bottom:18px}
+.report-info div{padding:8px 10px;border-bottom:1px solid #bbb}
+.report-info div:nth-last-child(-n+2){border-bottom:0}
+.report-section{break-inside:avoid;margin-top:20px}
+.report-section h3{font-size:18px;padding-bottom:6px;border-bottom:2px solid #333;margin-bottom:10px}
+.before-after-labels,.pair-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.before-after-labels div{text-align:center;font-weight:800;padding:5px;background:#eef1f3;border:1px solid #bbb}
+.pair-row{margin-top:10px;break-inside:avoid}
+.report-photo-slot{border:1px solid #aaa;min-height:210px;padding:6px;display:flex;align-items:center;justify-content:center;background:#fff}
+.report-photo-slot img{width:100%;height:205px;object-fit:contain;display:block}
+.report-photo-slot.missing{color:#999;font-size:13px;background:#fafafa}
+.report-note{margin-top:6px;font-size:12px;color:#555}
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;
+  background:#17212b;color:#fff;border-radius:999px;padding:10px 16px;font-size:13px;transition:.2s;z-index:100;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;background:var(--ok-soft);color:var(--ok);font-size:11px;font-weight:700}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .check-grid{grid-template-columns:1fr}
+  .photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .photo-toolbar{grid-template-columns:1fr 1fr}
+  .photo-toolbar .assign-btn{grid-column:1/-1}
+  .phase-columns{grid-template-columns:1fr}
+  .report-row{align-items:flex-start;flex-direction:column}
+  .report-row .toolbar{width:100%}
+  .report-row .toolbar button{flex:1}
+  .report-paper{padding:22px 16px 30px}
+  .report-photo-slot{min-height:150px}
+  .report-photo-slot img{height:145px}
+}
+@media (max-width:430px){
+  .page{padding-left:12px;padding-right:12px}
+  .photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-header h1{font-size:17px}
+  .hero-main h2{font-size:23px}
+  .before-after-labels,.pair-row{gap:6px}
+  .report-info{grid-template-columns:1fr}
+  .report-info div:nth-last-child(-n+2){border-bottom:1px solid #bbb}
+  .report-info div:last-child{border-bottom:0}
+}
+@media print{
+  body{background:#fff}
+  .app-header,.no-print,.toast{display:none!important}
+  .page{max-width:none;padding:0}
+  .preview-shell{padding:0;background:#fff}
+  .report-paper{box-shadow:none;width:100%;padding:10mm}
+}
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div>
+        <div class="eyebrow">清掃・補修 写真報告</div>
+        <h1>写真報告書メーカー</h1>
+      </div>
+      <button id="homeBtn" class="ghost-btn" type="button">ホーム</button>
+    </header>
+
+    <main id="view" class="page" aria-live="polite"></main>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
+  <script>
+
+(() => {
+  'use strict';
+
+  const DB_NAME = 'photo-report-maker-db';
+  const DB_VERSION = 1;
+  const stores = { properties:'properties', reports:'reports', photos:'photos' };
+  let db;
+  let currentReport = null;
+  let objectUrls = new Map();
+  let viewMode = 'home';
+
+  const view = document.getElementById('view');
+  const homeBtn = document.getElementById('homeBtn');
+  const toastEl = document.getElementById('toast');
+
+  function id(prefix='id'){ return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,9)}`; }
+  function localDateISO(date=new Date()){
+    const y=date.getFullYear(), m=String(date.getMonth()+1).padStart(2,'0'), d=String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+  function fmtDate(s){
+    if(!s) return '';
+    const [y,m,d]=s.split('-');
+    return `${y}年${Number(m)}月${Number(d)}日`;
+  }
+  function fmtDateTime(iso){
+    if(!iso) return '';
+    const d=new Date(iso);
+    return new Intl.DateTimeFormat('ja-JP',{dateStyle:'medium',timeStyle:'short'}).format(d);
+  }
+  function escapeHtml(v=''){
+    return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function showToast(msg){
+    toastEl.textContent=msg; toastEl.classList.add('show');
+    clearTimeout(showToast.t); showToast.t=setTimeout(()=>toastEl.classList.remove('show'),1800);
+  }
+  function revokeUrls(){
+    objectUrls.forEach(url=>URL.revokeObjectURL(url)); objectUrls.clear();
+  }
+  async function photoUrl(photoId){
+    if(objectUrls.has(photoId)) return objectUrls.get(photoId);
+    const p=await getOne(stores.photos, photoId);
+    if(!p?.blob) return '';
+    const url=URL.createObjectURL(p.blob); objectUrls.set(photoId,url); return url;
+  }
+
+  function openDb(){
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open(DB_NAME,DB_VERSION);
+      req.onupgradeneeded=()=>{
+        const d=req.result;
+        if(!d.objectStoreNames.contains(stores.properties)) d.createObjectStore(stores.properties,{keyPath:'id'});
+        if(!d.objectStoreNames.contains(stores.reports)) d.createObjectStore(stores.reports,{keyPath:'id'});
+        if(!d.objectStoreNames.contains(stores.photos)) {
+          const s=d.createObjectStore(stores.photos,{keyPath:'id'});
+          s.createIndex('reportId','reportId',{unique:false});
+        }
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+  function txStore(name, mode='readonly'){ return db.transaction(name,mode).objectStore(name); }
+  function put(name,obj){ return new Promise((res,rej)=>{const r=txStore(name,'readwrite').put(obj);r.onsuccess=()=>res(obj);r.onerror=()=>rej(r.error);}); }
+  function getOne(name,key){ return new Promise((res,rej)=>{const r=txStore(name).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}); }
+  function getAll(name){ return new Promise((res,rej)=>{const r=txStore(name).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);}); }
+  function del(name,key){ return new Promise((res,rej)=>{const r=txStore(name,'readwrite').delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);}); }
+  function getPhotosForReport(reportId){
+    return new Promise((res,rej)=>{
+      const t=db.transaction(stores.photos,'readonly');
+      const idx=t.objectStore(stores.photos).index('reportId');
+      const r=idx.getAll(reportId); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error);
+    });
+  }
+
+  async function seed(){
+    const props=await getAll(stores.properties);
+    if(props.length===0){
+      await put(stores.properties,{
+        id:id('property'),
+        name:'サンプルマンション',
+        address:'',
+        items:['基本清掃','家具家電対応','給水部品修理','台所床鳴り補修','玄関床CF'],
+        createdAt:new Date().toISOString()
+      });
+    }
+  }
+
+  async function saveReport(){
+    if(!currentReport) return;
+    currentReport.updatedAt=new Date().toISOString();
+    await put(stores.reports,currentReport);
+  }
+
+  function stepper(active){
+    const steps=['物件・日付','作業項目','写真振り分け','確認・PDF'];
+    return `<div class="stepper">${steps.map((s,i)=>`<span class="step ${i===active?'active':''}">${i+1}. ${s}</span>`).join('')}</div>`;
+  }
+
+  async function renderHome(){
+    viewMode='home'; currentReport=null; revokeUrls();
+    const [props,reports]=await Promise.all([getAll(stores.properties),getAll(stores.reports)]);
+    reports.sort((a,b)=>(b.workDate||'').localeCompare(a.workDate||'') || (b.updatedAt||'').localeCompare(a.updatedAt||''));
+    view.innerHTML=`
+      <section class="hero">
+        <div class="card hero-main">
+          <div class="pill">端末内保存</div>
+          <h2>写真をまとめて入れて、<br>作業前・作業後を並べる。</h2>
+          <p>物件テンプレートから項目を選び、写真を一括振り分け。最後に比較しやすいPDFへ出力します。</p>
+          <div class="hero-actions">
+            <button id="newReportBtn" class="primary-btn" type="button">＋ 新しい報告書</button>
+            <button id="templatesBtn" class="secondary-btn" type="button">物件テンプレート</button>
+          </div>
+        </div>
+        <div class="card metric">
+          <div class="metric-box"><strong>${reports.length}</strong><span>保存済み報告書</span></div>
+          <div class="metric-box"><strong>${props.length}</strong><span>物件テンプレート</span></div>
+          <div class="notice">写真・入力内容はこのブラウザのIndexedDBに保存されます。</div>
+        </div>
+      </section>
+      <section class="card" style="margin-top:16px">
+        <div class="section-title"><h2>過去の報告書</h2><span class="muted">${reports.length}件</span></div>
+        <div class="list">
+          ${reports.length ? reports.map(r=>`
+            <div class="report-row">
+              <div class="meta">
+                <div class="title">${escapeHtml(r.propertyName)}</div>
+                <div class="sub">${fmtDate(r.workDate)} ・ ${r.items.length}項目 ・ 更新 ${fmtDateTime(r.updatedAt)}</div>
+              </div>
+              <div class="toolbar">
+                <button class="small-btn open-report" data-id="${r.id}" type="button">開く</button>
+                <button class="small-btn danger-btn delete-report" data-id="${r.id}" type="button">削除</button>
+              </div>
+            </div>`).join('') : '<div class="empty">まだ報告書がありません。</div>'}
+        </div>
+      </section>`;
+    document.getElementById('newReportBtn').addEventListener('click',renderNewReportStart);
+    document.getElementById('templatesBtn').addEventListener('click',renderTemplates);
+    document.querySelectorAll('.open-report').forEach(b=>b.addEventListener('click',()=>openReport(b.dataset.id)));
+    document.querySelectorAll('.delete-report').forEach(b=>b.addEventListener('click',()=>deleteReport(b.dataset.id)));
+  }
+
+  async function renderNewReportStart(){
+    viewMode='report';
+    const props=await getAll(stores.properties);
+    if(!props.length){ await renderTemplates(); return; }
+    view.innerHTML=`
+      ${stepper(0)}
+      <section class="card">
+        <h2>物件と作業日</h2>
+        <div class="grid-2">
+          <div class="field">
+            <label for="propertySelect">マンション名</label>
+            <select id="propertySelect">
+              <option value="">選択してください</option>
+              ${props.sort((a,b)=>a.name.localeCompare(b.name,'ja')).map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}
+            </select>
+            <div class="help">物件を選ぶと、その物件に登録した作業項目テンプレートを読み込みます。</div>
+          </div>
+          <div class="field">
+            <label for="workDate">作業日</label>
+            <input id="workDate" type="date" value="${localDateISO()}">
+            <div class="help">新規作成時は端末の今日の日付。過去・未来の日付にも変更できます。</div>
+          </div>
+        </div>
+        <div class="sticky-actions">
+          <button id="cancelBtn" class="ghost-btn" type="button">キャンセル</button>
+          <button id="nextBtn" class="primary-btn" type="button">次へ</button>
+        </div>
+      </section>`;
+    document.getElementById('cancelBtn').addEventListener('click',renderHome);
+    document.getElementById('nextBtn').addEventListener('click',async()=>{
+      const propertyId=document.getElementById('propertySelect').value;
+      const workDate=document.getElementById('workDate').value;
+      if(!propertyId){ showToast('マンション名を選択してください'); return; }
+      if(!workDate){ showToast('作業日を選択してください'); return; }
+      const p=await getOne(stores.properties,propertyId);
+      currentReport={
+        id:id('report'), propertyId:p.id, propertyName:p.name, propertyAddress:p.address||'',
+        workDate, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
+        items:[], unassignedIds:[]
+      };
+      currentReport.templateItems=[...(p.items||[])];
+      await saveReport();
+      renderItems();
+    });
+  }
+
+  function renderItems(){
+    if(!currentReport) return;
+    const template=currentReport.templateItems || [];
+    const selected=new Set(currentReport.items.map(x=>x.name));
+    view.innerHTML=`
+      ${stepper(1)}
+      <section class="card">
+        <div class="section-title"><h2>今回の作業項目</h2><span class="muted">${escapeHtml(currentReport.propertyName)}</span></div>
+        <div id="itemChecks" class="check-grid">
+          ${template.map((name,i)=>`
+            <label class="check-item">
+              <input type="checkbox" value="${escapeHtml(name)}" ${selected.has(name)?'checked':''}>
+              <span>${escapeHtml(name)}</span>
+            </label>`).join('')}
+        </div>
+        <div class="grid-2" style="margin-top:14px">
+          <div class="field">
+            <label for="customItem">その他の項目を追加</label>
+            <input id="customItem" type="text" placeholder="例：浴室コーキング補修">
+          </div>
+          <div class="field" style="align-content:end">
+            <button id="addCustomBtn" class="secondary-btn" type="button">項目を追加</button>
+          </div>
+        </div>
+        <div class="sticky-actions">
+          <button id="backBtn" class="ghost-btn" type="button">戻る</button>
+          <button id="toPhotosBtn" class="primary-btn" type="button">写真振り分けへ</button>
+        </div>
+      </section>`;
+    document.getElementById('backBtn').addEventListener('click',renderReportInfoEdit);
+    document.getElementById('addCustomBtn').addEventListener('click',()=>{
+      const input=document.getElementById('customItem');
+      const name=input.value.trim(); if(!name) return;
+      if(!currentReport.templateItems.includes(name)) currentReport.templateItems.push(name);
+      const existing=currentReport.items.find(x=>x.name===name);
+      if(!existing) currentReport.items.push({id:id('item'),name,beforeIds:[],afterIds:[]});
+      renderItems();
+    });
+    document.getElementById('toPhotosBtn').addEventListener('click',async()=>{
+      const checked=[...document.querySelectorAll('#itemChecks input:checked')].map(x=>x.value);
+      if(!checked.length){ showToast('作業項目を1つ以上選択してください'); return; }
+      const oldMap=new Map(currentReport.items.map(x=>[x.name,x]));
+      currentReport.items=checked.map(name=>oldMap.get(name)||{id:id('item'),name,beforeIds:[],afterIds:[]});
+      await saveReport(); await renderPhotos();
+    });
+  }
+
+  function renderReportInfoEdit(){
+    if(!currentReport) return;
+    view.innerHTML=`
+      ${stepper(0)}
+      <section class="card">
+        <h2>物件と作業日</h2>
+        <div class="grid-2">
+          <div class="field"><label>マンション名</label><input id="propNameEdit" type="text" value="${escapeHtml(currentReport.propertyName)}"></div>
+          <div class="field"><label>作業日</label><input id="workDateEdit" type="date" value="${currentReport.workDate}"></div>
+        </div>
+        <div class="sticky-actions">
+          <button id="homeEditBtn" class="ghost-btn" type="button">ホーム</button>
+          <button id="saveInfoBtn" class="primary-btn" type="button">保存して次へ</button>
+        </div>
+      </section>`;
+    document.getElementById('homeEditBtn').addEventListener('click',renderHome);
+    document.getElementById('saveInfoBtn').addEventListener('click',async()=>{
+      currentReport.propertyName=document.getElementById('propNameEdit').value.trim()||currentReport.propertyName;
+      currentReport.workDate=document.getElementById('workDateEdit').value||currentReport.workDate;
+      await saveReport(); renderItems();
+    });
+  }
+
+  async function renderPhotos(){
+    if(!currentReport) return;
+    revokeUrls();
+    const allPhotoIds=[...currentReport.unassignedIds,...currentReport.items.flatMap(i=>[...i.beforeIds,...i.afterIds])];
+    const urlEntries=await Promise.all(allPhotoIds.map(async pid=>[pid,await photoUrl(pid)]));
+    const urlMap=new Map(urlEntries);
+    view.innerHTML=`
+      ${stepper(2)}
+      <section class="card">
+        <div class="section-title">
+          <div><h2>写真を一括アップロード</h2><div class="help">${escapeHtml(currentReport.propertyName)} ／ ${fmtDate(currentReport.workDate)}</div></div>
+          <span class="pill">${allPhotoIds.length}枚</span>
+        </div>
+        <label class="uploader" for="photoInput">
+          <strong>＋ 写真をまとめて選択</strong>
+          <div class="help" style="margin-top:5px">iPhoneの写真ライブラリから複数枚を一度に追加できます。</div>
+        </label>
+        <input id="photoInput" type="file" accept="image/*" multiple>
+      </section>
+
+      <section class="card">
+        <div class="section-title"><h3>未振り分け</h3><span class="muted">${currentReport.unassignedIds.length}枚</span></div>
+        ${currentReport.unassignedIds.length ? `
+          <div class="photo-toolbar">
+            <div class="field"><label>項目</label><select id="assignItem">${currentReport.items.map(i=>`<option value="${i.id}">${escapeHtml(i.name)}</option>`).join('')}</select></div>
+            <div class="field"><label>区分</label><select id="assignPhase"><option value="before">作業前</option><option value="after">作業後</option></select></div>
+            <button id="assignBtn" class="primary-btn assign-btn" type="button">選択写真を振り分け</button>
+          </div>
+          <div class="toolbar" style="margin-bottom:10px">
+            <button id="selectAllBtn" class="small-btn" type="button">全選択</button>
+            <button id="clearSelectBtn" class="small-btn" type="button">選択解除</button>
+          </div>
+          <div id="unassignedGrid" class="photo-grid">
+            ${currentReport.unassignedIds.map((pid,idx)=>`
+              <label class="photo-card" data-pid="${pid}">
+                <input class="photo-check" type="checkbox" value="${pid}">
+                <img src="${urlMap.get(pid)||''}" alt="未振り分け写真 ${idx+1}">
+                <span class="badge">${idx+1}</span>
+              </label>`).join('')}
+          </div>` : '<div class="empty">未振り分け写真はありません。</div>'}
+      </section>
+
+      ${currentReport.items.map(item=>`
+        <section class="card">
+          <div class="section-title"><h3>${escapeHtml(item.name)}</h3><span class="muted">${item.beforeIds.length} + ${item.afterIds.length}枚</span></div>
+          <div class="phase-columns">
+            ${phaseBoxHtml(item,'before','作業前',urlMap)}
+            ${phaseBoxHtml(item,'after','作業後',urlMap)}
+          </div>
+        </section>`).join('')}
+
+      <div class="sticky-actions no-print">
+        <button id="itemsBackBtn" class="ghost-btn" type="button">項目選択へ</button>
+        <button id="previewBtn" class="primary-btn" type="button">確認・PDFへ</button>
+      </div>`;
+
+    document.getElementById('photoInput').addEventListener('change',handlePhotoUpload);
+    const assignBtn=document.getElementById('assignBtn');
+    if(assignBtn) assignBtn.addEventListener('click',assignSelected);
+    document.getElementById('selectAllBtn')?.addEventListener('click',()=>document.querySelectorAll('.photo-check').forEach(x=>{x.checked=true;x.closest('.photo-card').classList.add('selected');}));
+    document.getElementById('clearSelectBtn')?.addEventListener('click',()=>document.querySelectorAll('.photo-check').forEach(x=>{x.checked=false;x.closest('.photo-card').classList.remove('selected');}));
+    document.querySelectorAll('.photo-check').forEach(x=>x.addEventListener('change',()=>x.closest('.photo-card').classList.toggle('selected',x.checked)));
+    document.querySelectorAll('[data-move]').forEach(b=>b.addEventListener('click',()=>movePhoto(b.dataset.item,b.dataset.phase,b.dataset.pid,Number(b.dataset.move))));
+    document.querySelectorAll('[data-unassign]').forEach(b=>b.addEventListener('click',()=>unassignPhoto(b.dataset.item,b.dataset.phase,b.dataset.pid)));
+    document.getElementById('itemsBackBtn').addEventListener('click',renderItems);
+    document.getElementById('previewBtn').addEventListener('click',renderPreview);
+  }
+
+  function phaseBoxHtml(item,phase,label,urlMap){
+    const ids=phase==='before'?item.beforeIds:item.afterIds;
+    return `<div class="phase-box">
+      <div class="phase-head"><strong>${label}</strong><span class="muted">${ids.length}枚</span></div>
+      ${ids.length ? ids.map((pid,idx)=>`
+        <div class="phase-photo">
+          <img src="${urlMap.get(pid)||''}" alt="${escapeHtml(item.name)} ${label} ${idx+1}">
+          <div>
+            <div class="help">No. ${idx+1}</div>
+            <div class="controls">
+              <button class="small-btn" type="button" data-move="-1" data-item="${item.id}" data-phase="${phase}" data-pid="${pid}" ${idx===0?'disabled':''}>↑</button>
+              <button class="small-btn" type="button" data-move="1" data-item="${item.id}" data-phase="${phase}" data-pid="${pid}" ${idx===ids.length-1?'disabled':''}>↓</button>
+              <button class="small-btn" type="button" data-unassign="1" data-item="${item.id}" data-phase="${phase}" data-pid="${pid}">未振り分けへ</button>
+            </div>
+          </div>
+        </div>`).join('') : '<div class="empty">まだありません</div>'}
+    </div>`;
+  }
+
+  async function handlePhotoUpload(e){
+    const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
+    if(!files.length) return;
+    showToast(`${files.length}枚を保存中…`);
+    for(const file of files){
+      const pid=id('photo');
+      await put(stores.photos,{id:pid,reportId:currentReport.id,blob:file,name:file.name,type:file.type,createdAt:new Date().toISOString()});
+      currentReport.unassignedIds.push(pid);
+    }
+    await saveReport(); await renderPhotos(); showToast(`${files.length}枚追加しました`);
+  }
+
+  async function assignSelected(){
+    const selected=[...document.querySelectorAll('.photo-check:checked')].map(x=>x.value);
+    if(!selected.length){ showToast('写真を選択してください'); return; }
+    const itemId=document.getElementById('assignItem').value;
+    const phase=document.getElementById('assignPhase').value;
+    const item=currentReport.items.find(i=>i.id===itemId);
+    if(!item) return;
+    const target=phase==='before'?item.beforeIds:item.afterIds;
+    selected.forEach(pid=>{ if(!target.includes(pid)) target.push(pid); });
+    currentReport.unassignedIds=currentReport.unassignedIds.filter(pid=>!selected.includes(pid));
+    await saveReport(); await renderPhotos(); showToast(`${selected.length}枚を振り分けました`);
+  }
+
+  async function movePhoto(itemId,phase,pid,delta){
+    const item=currentReport.items.find(i=>i.id===itemId); if(!item) return;
+    const arr=phase==='before'?item.beforeIds:item.afterIds; const i=arr.indexOf(pid), j=i+delta;
+    if(i<0||j<0||j>=arr.length) return;
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+    await saveReport(); await renderPhotos();
+  }
+  async function unassignPhoto(itemId,phase,pid){
+    const item=currentReport.items.find(i=>i.id===itemId); if(!item) return;
+    const arr=phase==='before'?item.beforeIds:item.afterIds;
+    const i=arr.indexOf(pid); if(i>=0) arr.splice(i,1);
+    if(!currentReport.unassignedIds.includes(pid)) currentReport.unassignedIds.push(pid);
+    await saveReport(); await renderPhotos();
+  }
+
+  async function renderPreview(){
+    if(!currentReport) return;
+    revokeUrls();
+    const ids=currentReport.items.flatMap(i=>[...i.beforeIds,...i.afterIds]);
+    const urlMap=new Map(await Promise.all(ids.map(async pid=>[pid,await photoUrl(pid)])));
+    const sections=currentReport.items.map(item=>{
+      const n=Math.max(item.beforeIds.length,item.afterIds.length,1);
+      const rows=Array.from({length:n},(_,idx)=>{
+        const b=item.beforeIds[idx], a=item.afterIds[idx];
+        return `<div class="pair-row">
+          ${reportSlot(b,urlMap,`${item.name} 作業前 ${idx+1}`)}
+          ${reportSlot(a,urlMap,`${item.name} 作業後 ${idx+1}`)}
+        </div>`;
+      }).join('');
+      return `<section class="report-section">
+        <h3>${escapeHtml(item.name)}</h3>
+        <div class="before-after-labels"><div>作業前</div><div>作業後</div></div>
+        ${rows}
+      </section>`;
+    }).join('');
+    view.innerHTML=`
+      ${stepper(3)}
+      <section class="card no-print">
+        <div class="section-title"><h2>PDFプレビュー</h2><span class="muted">作業前・作業後を同じ段で比較</span></div>
+        <div class="notice">PDFボタンでA4縦のPDFを生成します。写真枚数が多い場合は自動で複数ページになります。</div>
+      </section>
+      <div class="preview-shell">
+        <article id="pdfRoot" class="report-paper">
+          <div class="report-title">作業報告書</div>
+          <div class="report-info">
+            <div><strong>物件名：</strong>${escapeHtml(currentReport.propertyName)}</div>
+            <div><strong>作業日：</strong>${fmtDate(currentReport.workDate)}</div>
+            <div><strong>作成日時：</strong>${escapeHtml(fmtDateTime(currentReport.createdAt))}</div>
+            <div><strong>最終更新：</strong>${escapeHtml(fmtDateTime(currentReport.updatedAt))}</div>
+          </div>
+          ${sections}
+        </article>
+      </div>
+      <div class="sticky-actions no-print">
+        <button id="photosBackBtn" class="ghost-btn" type="button">写真へ戻る</button>
+        <button id="printBtn" class="secondary-btn" type="button">印刷</button>
+        <button id="pdfBtn" class="primary-btn" type="button">PDFを作成</button>
+      </div>`;
+    document.getElementById('photosBackBtn').addEventListener('click',renderPhotos);
+    document.getElementById('printBtn').addEventListener('click',()=>window.print());
+    document.getElementById('pdfBtn').addEventListener('click',createPdf);
+  }
+
+  function reportSlot(pid,urlMap,alt){
+    return pid
+      ? `<div class="report-photo-slot"><img src="${urlMap.get(pid)||''}" alt="${escapeHtml(alt)}"></div>`
+      : `<div class="report-photo-slot missing">写真なし</div>`;
+  }
+
+  async function createPdf(){
+    const el=document.getElementById('pdfRoot');
+    const filename=`${currentReport.propertyName}_${currentReport.workDate}_作業報告書.pdf`.replace(/[\\/:*?"<>|]/g,'_');
+    if(typeof window.html2pdf!=='function'){
+      showToast('PDFライブラリ未読込のため印刷画面を開きます');
+      window.print(); return;
+    }
+    const btn=document.getElementById('pdfBtn'); btn.disabled=true; btn.textContent='PDF作成中…';
+    try{
+      await window.html2pdf().set({
+        margin:[8,8,8,8],
+        filename,
+        image:{type:'jpeg',quality:.92},
+        html2canvas:{scale:1.7,useCORS:true,logging:false},
+        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+        pagebreak:{mode:['css','legacy']}
+      }).from(el).save();
+      showToast('PDFを作成しました');
+    }catch(err){
+      console.error(err); showToast('PDF作成に失敗しました。印刷をお試しください');
+    }finally{
+      btn.disabled=false; btn.textContent='PDFを作成';
+    }
+  }
+
+  async function openReport(reportId){
+    const r=await getOne(stores.reports,reportId); if(!r) return;
+    const p=await getOne(stores.properties,r.propertyId);
+    currentReport=r;
+    currentReport.templateItems=currentReport.templateItems || p?.items || currentReport.items.map(i=>i.name);
+    await renderPhotos();
+  }
+
+  async function deleteReport(reportId){
+    if(!confirm('この報告書と保存写真を削除しますか？')) return;
+    const photos=await getPhotosForReport(reportId);
+    for(const p of photos) await del(stores.photos,p.id);
+    await del(stores.reports,reportId);
+    showToast('削除しました'); renderHome();
+  }
+
+  async function renderTemplates(){
+    viewMode='templates'; currentReport=null; revokeUrls();
+    const props=(await getAll(stores.properties)).sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+    view.innerHTML=`
+      <section class="card">
+        <div class="section-title"><h2>物件テンプレート</h2><button id="addPropertyBtn" class="primary-btn" type="button">＋ 物件を追加</button></div>
+        <div class="help" style="margin-bottom:12px">物件ごとに、普段使う作業項目を登録します。報告書作成時はここから自動で候補を出します。</div>
+        <div class="list">
+          ${props.map(p=>`
+            <div class="report-row">
+              <div class="meta">
+                <div class="title">${escapeHtml(p.name)}</div>
+                <div class="sub">${escapeHtml((p.items||[]).join(' ／ ') || '作業項目なし')}</div>
+              </div>
+              <div class="toolbar">
+                <button class="small-btn edit-property" data-id="${p.id}" type="button">編集</button>
+                <button class="small-btn danger-btn delete-property" data-id="${p.id}" type="button">削除</button>
+              </div>
+            </div>`).join('')}
+        </div>
+      </section>`;
+    document.getElementById('addPropertyBtn').addEventListener('click',()=>renderPropertyEditor());
+    document.querySelectorAll('.edit-property').forEach(b=>b.addEventListener('click',()=>renderPropertyEditor(b.dataset.id)));
+    document.querySelectorAll('.delete-property').forEach(b=>b.addEventListener('click',()=>deleteProperty(b.dataset.id)));
+  }
+
+  async function renderPropertyEditor(propertyId){
+    const p=propertyId ? await getOne(stores.properties,propertyId) : {
+      id:id('property'),name:'',address:'',items:['基本清掃','家具家電対応','給水部品修理','台所床鳴り補修','玄関床CF']
+    };
+    view.innerHTML=`
+      <section class="card">
+        <h2>${propertyId?'物件テンプレート編集':'物件テンプレート追加'}</h2>
+        <div class="grid-2">
+          <div class="field"><label for="propName">マンション名</label><input id="propName" type="text" value="${escapeHtml(p.name)}" placeholder="例：○○マンション"></div>
+          <div class="field"><label for="propAddress">住所（任意）</label><input id="propAddress" type="text" value="${escapeHtml(p.address||'')}" placeholder="報告書には現在表示しません"></div>
+        </div>
+        <div class="field" style="margin-top:14px">
+          <label for="propItems">作業項目</label>
+          <textarea id="propItems" placeholder="1行に1項目">${escapeHtml((p.items||[]).join('\n'))}</textarea>
+          <div class="help">1行に1項目。例：基本清掃、家具家電対応、玄関床CF など。</div>
+        </div>
+        <div class="sticky-actions">
+          <button id="cancelPropBtn" class="ghost-btn" type="button">キャンセル</button>
+          <button id="savePropBtn" class="primary-btn" type="button">保存</button>
+        </div>
+      </section>`;
+    document.getElementById('cancelPropBtn').addEventListener('click',renderTemplates);
+    document.getElementById('savePropBtn').addEventListener('click',async()=>{
+      const name=document.getElementById('propName').value.trim();
+      if(!name){ showToast('マンション名を入力してください'); return; }
+      p.name=name; p.address=document.getElementById('propAddress').value.trim();
+      p.items=[...new Set(document.getElementById('propItems').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean))];
+      p.createdAt=p.createdAt||new Date().toISOString(); p.updatedAt=new Date().toISOString();
+      await put(stores.properties,p); showToast('保存しました'); renderTemplates();
+    });
+  }
+
+  async function deleteProperty(propertyId){
+    const reports=await getAll(stores.reports);
+    if(reports.some(r=>r.propertyId===propertyId)){
+      showToast('この物件の報告書があるため削除できません'); return;
+    }
+    if(!confirm('この物件テンプレートを削除しますか？')) return;
+    await del(stores.properties,propertyId); renderTemplates();
+  }
+
+  homeBtn.addEventListener('click',renderHome);
+  window.addEventListener('beforeunload',revokeUrls);
+
+  (async function init(){
+    try{
+      db=await openDb(); await seed(); await renderHome();
+      if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      }
+    }catch(err){
+      console.error(err);
+      view.innerHTML=`<section class="card"><h2>起動できませんでした</h2><p class="help">ブラウザの保存機能を利用できません。Safari / Chrome / Edge の通常モードで開いてください。</p></section>`;
+    }
+  })();
+})();
+
+</script>
+</body>
+</html>
