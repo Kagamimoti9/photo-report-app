@@ -1,785 +1,166 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#17324d">
-  <title>写真報告書メーカー</title>
-  
-  <style>
-
-:root{
-  color-scheme: light;
-  --bg:#f4f6f8;
-  --surface:#ffffff;
-  --ink:#17212b;
-  --muted:#65717d;
-  --line:#d9e0e6;
-  --accent:#17324d;
-  --accent-2:#2f6b8a;
-  --accent-soft:#e9f1f6;
-  --danger:#b42318;
-  --danger-soft:#feeceb;
-  --ok:#216e4a;
-  --ok-soft:#e9f6ef;
-  --shadow:0 8px 28px rgba(16,35,52,.08);
-  --radius:16px;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
-  background:var(--bg);
-  color:var(--ink);
-}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.app-header{
-  position:sticky; top:0; z-index:20;
-  display:flex; align-items:center; justify-content:space-between;
-  gap:16px; padding:14px max(16px,env(safe-area-inset-left)) 12px max(16px,env(safe-area-inset-right));
-  background:rgba(244,246,248,.96);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--line);
-}
-.app-header h1{font-size:20px; margin:0}
-.eyebrow{font-size:11px; letter-spacing:.08em; color:var(--muted); margin-bottom:2px}
-.page{max-width:1040px;margin:0 auto;padding:20px 16px 56px}
-.card{
-  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
-  padding:18px; box-shadow:var(--shadow); margin-bottom:16px;
-}
-.card h2,.card h3{margin:0 0 12px}
-.hero{
-  display:grid; grid-template-columns:1.35fr .65fr; gap:16px; align-items:stretch;
-}
-.hero .card{margin:0}
-.hero-main{display:flex;flex-direction:column;justify-content:center;min-height:190px}
-.hero-main h2{font-size:28px;line-height:1.25;margin-bottom:8px}
-.hero-main p{color:var(--muted);margin:0 0 20px}
-.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
-.metric{display:grid;gap:10px;align-content:center}
-.metric-box{padding:14px;border:1px solid var(--line);border-radius:14px;background:#fafbfc}
-.metric-box strong{font-size:24px;display:block}
-.metric-box span{font-size:12px;color:var(--muted)}
-.primary-btn,.secondary-btn,.ghost-btn,.danger-btn,.small-btn{
-  border-radius:12px; border:1px solid transparent; min-height:44px; padding:10px 14px; font-weight:700;
-}
-.primary-btn{background:var(--accent);color:#fff}
-.secondary-btn{background:var(--accent-soft);color:var(--accent);border-color:#cbdce7}
-.ghost-btn{background:#fff;color:var(--ink);border-color:var(--line)}
-.danger-btn{background:var(--danger-soft);color:var(--danger);border-color:#f3c4c0}
-.small-btn{min-height:34px;padding:6px 10px;font-size:13px;background:#fff;border-color:var(--line)}
-.primary-btn:disabled,.secondary-btn:disabled{opacity:.45;cursor:not-allowed}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.field{display:grid;gap:6px}
-.field label,.field-label{font-size:13px;font-weight:700}
-.field input,.field select,.field textarea,select,input[type="text"],input[type="date"]{
-  width:100%; min-height:44px; border:1px solid var(--line); border-radius:10px; padding:9px 11px;
-  background:#fff; color:var(--ink);
-}
-.field textarea{min-height:86px;resize:vertical}
-.help{font-size:12px;color:var(--muted);line-height:1.55}
-.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
-.section-title h2,.section-title h3{margin:0}
-.check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.check-item{
-  display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;
-}
-.check-item input{width:20px;height:20px}
-.list{display:grid;gap:10px}
-.report-row{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;
-}
-.report-row .meta{min-width:0}
-.report-row .title{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.report-row .sub{font-size:12px;color:var(--muted);margin-top:3px}
-.stepper{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-.step{
-  padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted);background:#fff;
-}
-.step.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.uploader{
-  border:2px dashed #b9c6d0;border-radius:16px;padding:20px;text-align:center;background:#fbfcfd;
-}
-.uploader input{display:none}
-.photo-toolbar{
-  display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin:12px 0;
-}
-.photo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.photo-card{
-  position:relative;border:2px solid transparent;border-radius:12px;overflow:hidden;background:#edf1f4;aspect-ratio:4/3;
-}
-.photo-card.selected{border-color:var(--accent)}
-.photo-card img{width:100%;height:100%;object-fit:cover;display:block}
-.photo-card input{
-  position:absolute;left:8px;top:8px;width:22px;height:22px;z-index:2;
-  accent-color:var(--accent);filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));
-}
-.photo-card .badge{
-  position:absolute;right:7px;bottom:7px;padding:3px 7px;border-radius:999px;background:rgba(0,0,0,.62);color:white;font-size:10px;
-}
-.phase-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.phase-box{border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
-.phase-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.phase-head strong{font-size:14px}
-.phase-photo{
-  display:grid;grid-template-columns:92px 1fr;gap:10px;padding:8px 0;border-top:1px solid var(--line);align-items:center;
-}
-.phase-photo:first-of-type{border-top:0}
-.phase-photo img{width:92px;height:70px;object-fit:cover;border-radius:9px;background:#eef2f5}
-.phase-photo .controls{display:flex;gap:5px;flex-wrap:wrap}
-.empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
-.notice{padding:12px 14px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:13px;line-height:1.55}
-.notice.warn{background:#fff6e6;color:#7a4a00}
-.sticky-actions{
-  position:sticky;bottom:0;z-index:15;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;
-  padding:12px;margin:16px -8px -8px;background:rgba(244,246,248,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line);
-}
-.preview-shell{background:#dfe5ea;padding:14px;border-radius:14px;overflow:auto}
-.report-paper{
-  width:min(100%,794px);margin:0 auto;background:#fff;color:#111;padding:34px 34px 44px;box-shadow:0 4px 18px rgba(0,0,0,.1);
-}
-.report-paper .report-title{text-align:center;font-size:24px;font-weight:800;margin-bottom:16px}
-.report-info{display:grid;grid-template-columns:1fr 1fr;border:1px solid #444;margin-bottom:18px}
-.report-info div{padding:8px 10px;border-bottom:1px solid #bbb}
-.report-info div:nth-last-child(-n+2){border-bottom:0}
-.report-section{break-inside:avoid;margin-top:20px}
-.report-section h3{font-size:18px;padding-bottom:6px;border-bottom:2px solid #333;margin-bottom:10px}
-.before-after-labels,.pair-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.before-after-labels div{text-align:center;font-weight:800;padding:5px;background:#eef1f3;border:1px solid #bbb}
-.pair-row{margin-top:10px;break-inside:avoid}
-.report-photo-slot{border:1px solid #aaa;min-height:210px;padding:6px;display:flex;align-items:center;justify-content:center;background:#fff}
-.report-photo-slot img{width:100%;height:205px;object-fit:contain;display:block}
-.report-photo-slot.missing{color:#999;font-size:13px;background:#fafafa}
-.report-note{margin-top:6px;font-size:12px;color:#555}
-.toast{
-  position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;
-  background:#17212b;color:#fff;border-radius:999px;padding:10px 16px;font-size:13px;transition:.2s;z-index:100;
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;background:var(--ok-soft);color:var(--ok);font-size:11px;font-weight:700}
-.muted{color:var(--muted)}
-.hidden{display:none!important}
-
-@media (max-width:760px){
-  .hero{grid-template-columns:1fr}
-  .grid-2,.grid-3{grid-template-columns:1fr}
-  .check-grid{grid-template-columns:1fr}
-  .photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .photo-toolbar{grid-template-columns:1fr 1fr}
-  .photo-toolbar .assign-btn{grid-column:1/-1}
-  .phase-columns{grid-template-columns:1fr}
-  .report-row{align-items:flex-start;flex-direction:column}
-  .report-row .toolbar{width:100%}
-  .report-row .toolbar button{flex:1}
-  .report-paper{padding:22px 16px 30px}
-  .report-photo-slot{min-height:150px}
-  .report-photo-slot img{height:145px}
-}
-@media (max-width:430px){
-  .page{padding-left:12px;padding-right:12px}
-  .photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .app-header h1{font-size:17px}
-  .hero-main h2{font-size:23px}
-  .before-after-labels,.pair-row{gap:6px}
-  .report-info{grid-template-columns:1fr}
-  .report-info div:nth-last-child(-n+2){border-bottom:1px solid #bbb}
-  .report-info div:last-child{border-bottom:0}
-}
-@media print{
-  body{background:#fff}
-  .app-header,.no-print,.toast{display:none!important}
-  .page{max-width:none;padding:0}
-  .preview-shell{padding:0;background:#fff}
-  .report-paper{box-shadow:none;width:100%;padding:10mm}
-}
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#163447">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="清掃写真報告">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>清掃写真報告</title>
+<style>
+:root{--bg:#f3f6f8;--card:#fff;--ink:#17212b;--muted:#65727d;--line:#d9e1e6;--navy:#163447;--navy2:#2e617f;--red:#bc2a25;--redBg:#fff0ef;--orange:#a45d00;--orangeBg:#fff4df;--green:#18794e;--greenBg:#eaf7f0;--yellow:#806100;--yellowBg:#fff8d8;--shadow:0 8px 24px rgba(20,38,50,.08);--r:15px}*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.top{position:sticky;top:0;z-index:40;background:rgba(243,246,248,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:10px max(12px,env(safe-area-inset-right)) 9px max(12px,env(safe-area-inset-left));display:flex;justify-content:space-between;align-items:center;gap:8px}.brand{font-weight:900}.brand small{display:block;font-size:10px;letter-spacing:.12em;color:var(--muted)}.page{max-width:1050px;margin:auto;padding:14px 12px 94px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:15px;margin-bottom:12px}.hero{background:linear-gradient(135deg,#163447,#2b5a72);color:#fff;border:0}.hero h2{margin:0 0 7px;font-size:24px}.hero p{margin:0;opacity:.84;line-height:1.55}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.between{display:flex;justify-content:space-between;align-items:center;gap:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.field{display:grid;gap:5px}.field label,.label{font-size:12px;font-weight:900}.field input,.field select,.field textarea,.search{width:100%;min-height:44px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:9px 11px;color:var(--ink)}textarea{min-height:80px}.btn{border:1px solid transparent;border-radius:11px;min-height:42px;padding:8px 12px;font-weight:900}.btn.primary{background:var(--navy);color:#fff}.btn.secondary{background:#eaf0f4;color:var(--navy);border-color:#ccd8df}.btn.ghost{background:#fff;border-color:var(--line);color:var(--ink)}.btn.danger{background:var(--redBg);border-color:#efc5c2;color:var(--red)}.btn.small{min-height:34px;padding:5px 9px;font-size:12px}.btn:disabled{opacity:.42;cursor:not-allowed}.status{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900}.s-before,.s-progress{background:var(--redBg);color:var(--red)}.s-review{background:var(--yellowBg);color:var(--yellow)}.s-revisit{background:var(--orangeBg);color:var(--orange)}.s-done{background:var(--greenBg);color:var(--green)}.s-none{background:#edf1f3;color:#60707b}.muted{color:var(--muted)}.help{font-size:12px;color:var(--muted);line-height:1.55}.sectionTitle{font-size:18px;font-weight:900;margin:0 0 9px}.kpiGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kpi{border:1px solid var(--line);border-radius:13px;padding:11px;background:#fff}.kpi b{display:block;font-size:22px}.kpi span{font-size:11px;color:var(--muted);font-weight:800}.list{display:grid;gap:8px}.item{border:1px solid var(--line);border-radius:13px;padding:11px;background:#fff}.itemTitle{font-weight:900}.itemSub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}.tabs{display:flex;gap:6px;overflow:auto;padding-bottom:4px}.tab{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900}.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}.bottom{position:fixed;bottom:0;left:0;right:0;z-index:35;background:rgba(255,255,255,.97);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:5px max(5px,env(safe-area-inset-right)) calc(5px + env(safe-area-inset-bottom)) max(5px,env(safe-area-inset-left));backdrop-filter:blur(12px)}.navBtn{border:0;background:transparent;padding:7px 2px;font-size:11px;font-weight:850;color:#65727d}.navBtn.active{color:var(--navy)}.navBtn i{display:block;font-style:normal;font-size:20px;line-height:1}.slotTable{border:1px solid var(--line);border-radius:14px;overflow:hidden}.slotRow{display:grid;grid-template-columns:96px 1fr 1fr;border-top:1px solid var(--line);min-height:126px}.slotRow:first-child{border-top:0}.zone{padding:8px;background:#f8fafb;display:flex;align-items:center;font-weight:900}.slot{padding:6px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:5px;min-width:0}.slotLabel{font-size:10px;font-weight:900;color:var(--muted)}.photoBox{position:relative;min-height:82px;border:1.5px dashed #bcc8cf;border-radius:10px;background:#f9fbfc;overflow:hidden;display:flex;align-items:center;justify-content:center}.photoBox.has{border-style:solid;background:#fff}.photoBox img{width:100%;height:110px;object-fit:cover;display:block}.photoBox input{display:none}.addPhoto{width:100%;min-height:82px;border:0;background:transparent;color:var(--navy);font-weight:900}.warn{position:absolute;top:4px;right:4px;background:var(--yellowBg);color:var(--yellow);border:1px solid #eadb8a;border-radius:999px;padding:3px 6px;font-size:9px;font-weight:900}.progress{height:7px;background:#e7edf0;border-radius:999px;overflow:hidden}.progress span{display:block;height:100%;background:var(--navy2)}.notice{border-radius:12px;padding:10px 11px;font-size:12px;line-height:1.5;background:#eaf0f4;color:var(--navy)}.notice.warn{background:var(--yellowBg);color:#665000}.notice.danger{background:var(--redBg);color:var(--red)}.searchResults{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}.searchResult{padding:10px 11px;border-top:1px solid var(--line)}.searchResult:first-child{border-top:0}.timeline{display:grid;gap:0}.event{padding:10px 0 10px 18px;border-left:2px solid #cfd9df;position:relative}.event:before{content:"";position:absolute;left:-5px;top:15px;width:8px;height:8px;border-radius:50%;background:var(--navy2)}.event b{font-size:13px}.event div{font-size:11px;color:var(--muted);margin-top:2px}.loginWrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}.loginCard{width:min(100%,430px);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px}.loginCard h1{margin:0 0 5px;font-size:25px}.loginCard .field{margin-top:12px}.paperWrap{background:#dce2e6;padding:10px;border-radius:13px;overflow:auto}.paper{width:min(100%,794px);margin:auto;background:#fff;padding:14mm 12mm;box-shadow:0 4px 18px rgba(0,0,0,.1);color:#111}.pdfTitle{font-size:22px;font-weight:900;border-bottom:3px solid #1c3c50;padding-bottom:7px}.pdfMeta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #666;margin:9px 0 13px}.pdfMeta div{padding:6px 8px;font-size:12px;border-bottom:1px solid #bbb}.pdfPair{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px;break-inside:avoid}.pdfCell{border:1px solid #aaa;padding:5px}.pdfCell b{display:block;font-size:10px;margin-bottom:4px}.pdfCell img{display:block;width:100%;height:165px;object-fit:contain;background:#fafafa}.adminGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:10px}.toast{position:fixed;z-index:100;left:50%;bottom:84px;transform:translate(-50%,20px);opacity:0;transition:.2s;background:#17212b;color:#fff;border-radius:999px;padding:10px 14px;font-size:12px;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}.syncBadge{font-size:10px;font-weight:900;border-radius:999px;padding:4px 7px;background:#eef2f4;color:#596975}.syncBadge.off{background:var(--redBg);color:var(--red)}@media(max-width:720px){.grid2,.grid3,.adminGrid{grid-template-columns:1fr}.kpiGrid{grid-template-columns:repeat(2,1fr)}.slotRow{grid-template-columns:76px 1fr 1fr}.zone{font-size:12px;padding:6px}.slot{padding:5px}.photoBox img{height:94px}.pdfPair{gap:5px}.pdfCell img{height:135px}.pdfMeta{grid-template-columns:1fr}.bottom{grid-template-columns:repeat(5,1fr)}}@media print{body{background:#fff}.top,.bottom,.noPrint,.toast{display:none!important}.page{max-width:none;padding:0}.paperWrap{padding:0;background:#fff}.paper{width:100%;box-shadow:none;margin:0;padding:8mm}.pdfCell img{height:58mm}}
 </style>
 </head>
 <body>
-  <div id="app">
-    <header class="app-header">
-      <div>
-        <div class="eyebrow">清掃・補修 写真報告</div>
-        <h1>写真報告書メーカー</h1>
-      </div>
-      <button id="homeBtn" class="ghost-btn" type="button">ホーム</button>
-    </header>
+<div id="app"></div><div id="toast" class="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
+<script>
+(()=>{'use strict';
+const SUPA_URL='https://rcunbtgeketpvuxcnass.supabase.co';
+const SUPA_KEY='sb_publishable_wt7G97Dn-kgbPC8gU1yw8Q_dVlAkREd';
+const sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const BASIC=['ベランダ','居室','台所','トイレ','風呂','玄関'];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uuid=()=>crypto.randomUUID(); const now=()=>new Date().toISOString();
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const fmtDate=s=>s?new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric'}).format(new Date(s+'T00:00:00')):'';
+const fmtTime=s=>s?new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(s)):'';
+const toEmail=id=>`${String(id).trim().toLowerCase().replace(/[^a-z0-9._-]/g,'-')}@photo-report.local`;
+function say(x){const toast=$('#toast');if(!toast)return;toast.textContent=x;toast.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>{const t=$('#toast');if(t)t.classList.remove('show')},1800)}
+let session=null,me=null,state={page:'home',filter:'all',query:'',current:null,props:[],workItems:[],reports:[],profiles:[],logs:[]};let qseq=0;
+let signed=new Map(),aiModel=null,aiLoad=null;
 
-    <main id="view" class="page" aria-live="polite"></main>
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  </div>
+// --- Offline queue -------------------------------------------------------
+const ODB='photo-report-offline-v3'; let odb;
+function openODB(){return new Promise((res,rej)=>{const r=indexedDB.open(ODB,1);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('queue'))d.createObjectStore('queue',{keyPath:'id'});if(!d.objectStoreNames.contains('cache'))d.createObjectStore('cache',{keyPath:'key'})};r.onsuccess=()=>{odb=r.result;res()};r.onerror=()=>rej(r.error)})}
+function os(n,m='readonly'){return odb.transaction(n,m).objectStore(n)}
+function qPut(o){return new Promise((res,rej)=>{const r=os('queue','readwrite').put(o);r.onsuccess=()=>res(o);r.onerror=()=>rej(r.error)})}
+function qAll(){return new Promise((res,rej)=>{const r=os('queue').getAll();r.onsuccess=()=>res((r.result||[]).sort((a,b)=>(a.order||0)-(b.order||0)));r.onerror=()=>rej(r.error)})}
+function qDel(id){return new Promise((res,rej)=>{const r=os('queue','readwrite').delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+async function cacheSet(key,value){if(!odb)return;return new Promise((res,rej)=>{const r=os('cache','readwrite').put({key,value,at:now()});r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+async function cacheGet(key){if(!odb)return null;return new Promise((res,rej)=>{const r=os('cache').get(key);r.onsuccess=()=>res(r.result?.value??null);r.onerror=()=>rej(r.error)})}
+async function enqueue(type,payload,blob=null){await qPut({id:uuid(),type,payload,blob,createdAt:now(),order:Date.now()*1000+(qseq++%1000)});updateSyncBadge();}
+async function updateSyncBadge(){const n=(await qAll()).length;const b=$('#syncBadge');if(b){b.textContent=n?`${n}件 同期待ち`:(navigator.onLine?'同期済み':'オフライン');b.classList.toggle('off',!navigator.onLine||!!n)}}
+async function syncQueue(){if(!navigator.onLine||!session||!me?.active)return;const list=await qAll();for(const x of list){try{if(x.type==='insert'){const {error}=await sb.from(x.payload.table).insert(x.payload.data);if(error)throw error}else if(x.type==='update'){let q=sb.from(x.payload.table).update(x.payload.data);for(const [k,v] of Object.entries(x.payload.eq||{}))q=q.eq(k,v);const {error}=await q;if(error)throw error}else if(x.type==='delete'){let q=sb.from(x.payload.table).delete();for(const [k,v] of Object.entries(x.payload.eq||{}))q=q.eq(k,v);const {error}=await q;if(error)throw error}else if(x.type==='upload'){const {path,contentType}=x.payload;const {error}=await sb.storage.from('report-photos').upload(path,x.blob,{contentType,upsert:true});if(error)throw error}else if(x.type==='log'){const {error}=await sb.from('audit_logs').insert(x.payload);if(error)throw error}await qDel(x.id)}catch(e){console.warn('sync failed',x,e);break}}await updateSyncBadge();if(list.length)await loadCore(true)}
+window.addEventListener('online',()=>{updateSyncBadge();syncQueue()});window.addEventListener('offline',updateSyncBadge);
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
-  <script>
+async function dbInsert(table,data){if(navigator.onLine){const {error}=await sb.from(table).insert(data);if(!error)return;if(!String(error.message).includes('Failed to fetch'))throw error}await enqueue('insert',{table,data})}
+async function dbUpdate(table,data,eq){if(navigator.onLine){let q=sb.from(table).update(data);for(const[k,v]of Object.entries(eq))q=q.eq(k,v);const {error}=await q;if(!error)return;if(!String(error.message).includes('Failed to fetch'))throw error}await enqueue('update',{table,data,eq})}
+async function logAction(reportId,action,detail={}){const row={report_id:reportId,actor_id:me.id,action,detail,created_at:now()};if(navigator.onLine){const {error}=await sb.from('audit_logs').insert(row);if(!error)return}await enqueue('log',row)}
 
-(() => {
-  'use strict';
+// --- Auth ---------------------------------------------------------------
+async function bootstrapStatus(){try{const r=await fetch(`${SUPA_URL}/functions/v1/bootstrap-admin`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},body:JSON.stringify({action:'status'})});return await r.json()}catch{return{initialized:true}}}
+async function renderLogin(){const st=await bootstrapStatus();document.body.innerHTML=`<div id="app"></div><div id="toast" class="toast"></div>`;const a=$('#app');a.innerHTML=`<div class="loginWrap"><div class="loginCard"><div class="muted" style="font-size:11px;font-weight:900;letter-spacing:.12em">CO-OP CLEANING WORKFLOW</div><h1>清掃写真報告</h1><div class="help">IDとパスワードでログインします。IDは半角英数字・._- を使用します。</div><div class="field"><label>ログインID</label><input id="loginId" autocomplete="username" placeholder="例：tamura01"></div><div class="field"><label>パスワード</label><input id="loginPw" type="password" autocomplete="current-password"></div><button id="loginBtn" class="btn primary" style="width:100%;margin-top:14px">ログイン</button>${st.initialized?'':`<div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line)"><div class="label">初回セットアップ</div><div class="help">最初の1名だけ管理者IDを作成できます。</div><button id="setupBtn" class="btn secondary" style="width:100%;margin-top:8px">初期管理者を登録</button></div>`}</div></div>`;$('#loginBtn').onclick=login;if($('#setupBtn'))$('#setupBtn').onclick=setupAdmin}
+async function login(){const id=$('#loginId').value.trim(),pw=$('#loginPw').value; if(!id||!pw)return say('IDとパスワードを入力してください');const b=$('#loginBtn');b.disabled=true;b.textContent='ログイン中…';const {data,error}=await sb.auth.signInWithPassword({email:toEmail(id),password:pw});if(error){b.disabled=false;b.textContent='ログイン';return say('IDまたはパスワードを確認してください')}session=data.session;await afterAuth()}
+async function setupAdmin(){const code=prompt('初期セットアップコード');if(!code)return;const id=prompt('管理者ID（半角英数字・._-、3文字以上）');if(!id)return;const pw=prompt('管理者パスワード（8文字以上）');if(!pw)return;const r=await fetch(`${SUPA_URL}/functions/v1/bootstrap-admin`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},body:JSON.stringify({setup_code:code,login_id:id,password:pw})});const j=await r.json();if(!r.ok)return alert(j.error||'作成できませんでした');alert('管理者を作成しました。今のIDでログインしてください。');renderLogin()}
+async function afterAuth(){const {data:{session:s}}=await sb.auth.getSession();session=s;if(!session)return renderLogin();const {data,error}=await sb.from('profiles').select('*').eq('id',session.user.id).single();if(error||!data){await sb.auth.signOut();return renderLogin()}me=data;if(!me.active){document.body.innerHTML=`<div class="loginWrap"><div class="loginCard"><h1>アカウント停止中</h1><p class="help">このIDはまだ有効化されていないか、管理者により停止されています。</p><button class="btn ghost" id="out">ログアウト</button></div></div>`;$('#out').onclick=()=>sb.auth.signOut().then(renderLogin);return}if(me.role==='worker'&&!me.display_name)return firstName();await loadCore();renderShell()}
+function firstName(){document.body.innerHTML=`<div class="loginWrap"><div class="loginCard"><h1>担当者名を登録</h1><p class="help">初回だけ入力します。次回以降は自動で担当者名として記録されます。</p><div class="field"><label>担当者名</label><input id="firstName" placeholder="例：田村 空丈"></div><button id="saveName" class="btn primary" style="width:100%;margin-top:14px">登録して開始</button></div></div>`;$('#saveName').onclick=async()=>{const name=$('#firstName').value.trim();if(!name)return say('名前を入力してください');const {data,error}=await sb.functions.invoke('set-my-name',{body:{display_name:name}});if(error||data?.error)return alert(data?.error||error.message);me.display_name=name;await loadCore();renderShell()}}
 
-  const DB_NAME = 'photo-report-maker-db';
-  const DB_VERSION = 1;
-  const stores = { properties:'properties', reports:'reports', photos:'photos' };
-  let db;
-  let currentReport = null;
-  let objectUrls = new Map();
-  let viewMode = 'home';
+// --- Data ---------------------------------------------------------------
+async function loadCore(force=false){if(!navigator.onLine){const c=await cacheGet('core');if(c){Object.assign(state,c);return}throw new Error('オフラインでキャッシュがありません')}const [p,w,r,pr]=await Promise.all([
+ sb.from('properties').select('*').eq('active',true).order('name'),
+ sb.from('work_items').select('id,name,kind,active,order_no,created_by,created_at,updated_at').eq('active',true).order('order_no'),
+ sb.from('reports').select('*,properties(name,address),report_workers(user_id,profiles(display_name,login_id)),report_tasks(id,item_name,work_item_id,quantity,unit_price_snapshot,sort_no),completed:profiles!reports_completed_by_fkey(display_name,login_id),updatedby:profiles!reports_last_updated_by_fkey(display_name,login_id)').is('deleted_at',null).order('updated_at',{ascending:false}).limit(1500),
+ me?.role==='admin'?sb.from('profiles').select('*').order('created_at'):Promise.resolve({data:[]})
+ ]);if(p.error)throw p.error;if(w.error)throw w.error;if(r.error)throw r.error;state.props=p.data||[];state.workItems=w.data||[];state.reports=r.data||[];state.profiles=pr.data||[];await cacheSet('core',{props:state.props,workItems:state.workItems,reports:state.reports,profiles:state.profiles});await updateSyncBadge()}
+const statusMeta=s=>({before:['作業前','s-before'],progress:['作業中','s-progress'],review:['要確認','s-review'],revisit:['要再訪','s-revisit'],done:['完了','s-done']}[s]||['未着手','s-none']);
+const workerName=r=>{const x=(r.report_workers||[]).map(v=>v.profiles?.display_name||v.profiles?.login_id).filter(Boolean);return x.length?x.join('・'):'—'};
+function reportMatch(r,q){q=q.trim().toLowerCase();if(!q)return true;const t=[r.properties?.name,r.room_no,r.work_date,r.status,statusMeta(r.status)[0],workerName(r),...(r.report_tasks||[]).map(x=>x.item_name)].join(' ').toLowerCase();return t.includes(q)}
+function searchSummary(x){const ws=String(x.worker_names||'').split('・').filter(Boolean),ts=String(x.task_names||'').split(' / ').filter(Boolean);return {id:x.id,property_id:x.property_id,room_no:x.room_no,work_date:x.work_date,status:x.status,updated_at:x.updated_at,completed_at:x.completed_at,locked:x.locked,properties:{name:x.property_name||'',address:x.property_address||''},report_workers:ws.map(n=>({profiles:{display_name:n,login_id:n}})),report_tasks:ts.map((n,i)=>({id:'search-'+i,item_name:n,sort_no:i}))}}
+async function serverSearchReports(q='',status='',date='',limit=300){if(!navigator.onLine)return state.reports.filter(r=>reportMatch(r,q)&&(!status||r.status===status)&&(!date||r.work_date===date)).slice(0,limit);let z=sb.from('report_search_index').select('*').order('updated_at',{ascending:false}).limit(limit);if(q.trim())z=z.ilike('search_text',`%${q.trim().toLowerCase()}%`);if(status)z=z.eq('status',status);if(date)z=z.eq('work_date',date);const {data,error}=await z;if(error)throw error;return (data||[]).map(searchSummary)}
 
-  const view = document.getElementById('view');
-  const homeBtn = document.getElementById('homeBtn');
-  const toastEl = document.getElementById('toast');
+// --- Shell/nav ----------------------------------------------------------
+function renderShell(){document.body.innerHTML=`<header class="top"><div class="brand"><small>CO-OP CLEANING WORKFLOW</small>清掃写真報告 <span style="font-size:9px;color:var(--muted)">v3</span></div><div class="row"><span id="syncBadge" class="syncBadge"></span><button id="meBtn" class="btn ghost small">${me.role==='admin'?'管理者':esc(me.display_name||me.login_id)}</button></div></header><main id="view" class="page"></main><nav class="bottom"><button class="navBtn" data-page="home"><i>⌂</i>ホーム</button><button class="navBtn" data-page="work"><i>▣</i>作業</button><button class="navBtn" data-page="reports"><i>▤</i>報告書</button><button class="navBtn" data-page="search"><i>⌕</i>検索</button><button class="navBtn" data-page="history"><i>↺</i>履歴</button></nav><div id="toast" class="toast"></div>`;$$('.navBtn').forEach(b=>b.onclick=()=>go(b.dataset.page));$('#meBtn').onclick=accountMenu;go(state.page||'home');updateSyncBadge();syncQueue()}
+function go(p){state.page=p;$$('.navBtn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));({home:renderHome,work:renderWork,reports:renderReports,search:renderSearch,history:renderHistory,admin:renderAdmin}[p]||renderHome)()}
+function accountMenu(){const admin=me.role==='admin';const x=prompt(`${admin?'管理者':me.display_name}\n1: ログアウト${admin?'\n2: 管理画面':''}\n3: 同期\n4: マンション・作業項目編集`,'');if(x==='1')sb.auth.signOut().then(()=>renderLogin());else if(x==='2'&&admin)go('admin');else if(x==='3')syncQueue();else if(x==='4')renderMasterEditor()}
 
-  function id(prefix='id'){ return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,9)}`; }
-  function localDateISO(date=new Date()){
-    const y=date.getFullYear(), m=String(date.getMonth()+1).padStart(2,'0'), d=String(date.getDate()).padStart(2,'0');
-    return `${y}-${m}-${d}`;
-  }
-  function fmtDate(s){
-    if(!s) return '';
-    const [y,m,d]=s.split('-');
-    return `${y}年${Number(m)}月${Number(d)}日`;
-  }
-  function fmtDateTime(iso){
-    if(!iso) return '';
-    const d=new Date(iso);
-    return new Intl.DateTimeFormat('ja-JP',{dateStyle:'medium',timeStyle:'short'}).format(d);
-  }
-  function escapeHtml(v=''){
-    return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-  function showToast(msg){
-    toastEl.textContent=msg; toastEl.classList.add('show');
-    clearTimeout(showToast.t); showToast.t=setTimeout(()=>toastEl.classList.remove('show'),1800);
-  }
-  function revokeUrls(){
-    objectUrls.forEach(url=>URL.revokeObjectURL(url)); objectUrls.clear();
-  }
-  async function photoUrl(photoId){
-    if(objectUrls.has(photoId)) return objectUrls.get(photoId);
-    const p=await getOne(stores.photos, photoId);
-    if(!p?.blob) return '';
-    const url=URL.createObjectURL(p.blob); objectUrls.set(photoId,url); return url;
-  }
 
-  function openDb(){
-    return new Promise((resolve,reject)=>{
-      const req=indexedDB.open(DB_NAME,DB_VERSION);
-      req.onupgradeneeded=()=>{
-        const d=req.result;
-        if(!d.objectStoreNames.contains(stores.properties)) d.createObjectStore(stores.properties,{keyPath:'id'});
-        if(!d.objectStoreNames.contains(stores.reports)) d.createObjectStore(stores.reports,{keyPath:'id'});
-        if(!d.objectStoreNames.contains(stores.photos)) {
-          const s=d.createObjectStore(stores.photos,{keyPath:'id'});
-          s.createIndex('reportId','reportId',{unique:false});
-        }
-      };
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
-    });
-  }
-  function txStore(name, mode='readonly'){ return db.transaction(name,mode).objectStore(name); }
-  function put(name,obj){ return new Promise((res,rej)=>{const r=txStore(name,'readwrite').put(obj);r.onsuccess=()=>res(obj);r.onerror=()=>rej(r.error);}); }
-  function getOne(name,key){ return new Promise((res,rej)=>{const r=txStore(name).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}); }
-  function getAll(name){ return new Promise((res,rej)=>{const r=txStore(name).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);}); }
-  function del(name,key){ return new Promise((res,rej)=>{const r=txStore(name,'readwrite').delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);}); }
-  function getPhotosForReport(reportId){
-    return new Promise((res,rej)=>{
-      const t=db.transaction(stores.photos,'readonly');
-      const idx=t.objectStore(stores.photos).index('reportId');
-      const r=idx.getAll(reportId); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error);
-    });
-  }
+async function renderMasterEditor(){const v=$('#view');$$('.navBtn').forEach(x=>x.classList.remove('active'));v.innerHTML=`<div class="between"><h2 style="margin:0">マンション・項目編集</h2><button id="mBack" class="btn ghost small">戻る</button></div><section class="card" style="margin-top:12px"><div class="between"><h3 class="sectionTitle" style="margin:0">マンション</h3><div class="row"><label class="btn ghost small">CSV一括<input id="mCsv" type="file" accept=".csv,text/csv" style="display:none"></label><button id="mAddP" class="btn secondary small">＋追加</button></div></div><input id="mPQ" class="search" style="margin:9px 0" placeholder="マンション名を検索"><div id="mPList" class="list"></div></section><section class="card"><div class="between"><h3 class="sectionTitle" style="margin:0">作業項目</h3><button id="mAddW" class="btn secondary small">＋追加</button></div><div id="mWList" class="list" style="margin-top:9px">${state.workItems.map(w=>`<div class="item"><div class="between"><div><b>${esc(w.name)}</b><div class="itemSub">${w.kind==='basic'?'基本清掃テンプレート':'通常項目'}</div></div><button class="btn ghost small mEditW" data-id="${w.id}">編集</button></div></div>`).join('')}</div></section>`;const draw=()=>{$('#mPList').innerHTML=state.props.filter(p=>p.name.toLowerCase().includes($('#mPQ').value.trim().toLowerCase())).slice(0,100).map(p=>`<div class="item"><div class="between"><div><b>${esc(p.name)}</b><div class="itemSub">${esc(p.address||'')}</div></div><button class="btn ghost small mEditP" data-id="${p.id}">編集</button></div></div>`).join('')};$('#mPQ').oninput=()=>{draw();wireP()};const wireP=()=>$$('.mEditP').forEach(x=>x.onclick=()=>editProperty(state.props.find(p=>p.id===x.dataset.id)));draw();wireP();$$('.mEditW').forEach(x=>x.onclick=()=>editWorkItem(state.workItems.find(w=>w.id===x.dataset.id)));$('#mAddP').onclick=addProperty;$('#mAddW').onclick=addWorkItem;$('#mCsv').onchange=e=>importPropertiesCSV(e.target.files[0]);$('#mBack').onclick=()=>go('home')}
+async function importPropertiesCSV(file){if(!file)return;const text=await file.text();const lines=text.replace(/^\ufeff/,'').split(/\r?\n/).filter(x=>x.trim());if(!lines.length)return;const parse=line=>{const out=[];let cur='',q=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++}else q=!q}else if(c===','&&!q){out.push(cur);cur=''}else cur+=c}out.push(cur);return out.map(x=>x.trim())};let rows=lines.map(parse);if(/マンション|物件|name/i.test(rows[0][0]||''))rows=rows.slice(1);const existing=new Set(state.props.map(p=>p.name.trim().toLowerCase()));const add=rows.filter(r=>r[0]&&!existing.has(r[0].trim().toLowerCase())).map(r=>({id:uuid(),name:r[0].trim(),address:(r[1]||'').trim(),active:true,created_by:me.id,created_at:now(),updated_at:now()}));if(!add.length)return say('追加対象がありません');if(!confirm(`${add.length}件のマンションを追加しますか？`))return;for(const row of add)await dbInsert('properties',row);state.props.push(...add);await logAction(null,'add_property',{bulk:true,count:add.length});await cacheSet('core',{props:state.props,workItems:state.workItems,reports:state.reports,profiles:state.profiles});say(`${add.length}件追加しました`);renderMasterEditor()}
+async function editProperty(p){if(!p)return;const name=prompt('マンション名',p.name);if(name===null||!name.trim())return;const address=prompt('住所',p.address||'');if(address===null)return;await dbUpdate('properties',{name:name.trim(),address,updated_at:now()},{id:p.id});await logAction(null,'edit_property',{property_id:p.id,name:name.trim()});p.name=name.trim();p.address=address;await cacheSet('core',{props:state.props,workItems:state.workItems,reports:state.reports,profiles:state.profiles});renderMasterEditor()}
+async function editWorkItem(w){if(!w)return;const name=prompt('作業項目名',w.name);if(name===null||!name.trim())return;if(w.kind==='basic'&&name.trim()!=='基本清掃'&&!confirm('基本清掃テンプレートの名前を変更しますか？6部位構成は維持されます。'))return;await dbUpdate('work_items',{name:name.trim(),updated_at:now()},{id:w.id});await logAction(null,'edit_work_item',{work_item_id:w.id,name:name.trim()});w.name=name.trim();await cacheSet('core',{props:state.props,workItems:state.workItems,reports:state.reports,profiles:state.profiles});renderMasterEditor()}
 
-  async function seed(){
-    const props=await getAll(stores.properties);
-    if(props.length===0){
-      await put(stores.properties,{
-        id:id('property'),
-        name:'サンプルマンション',
-        address:'',
-        items:['基本清掃','家具家電対応','給水部品修理','台所床鳴り補修','玄関床CF'],
-        createdAt:new Date().toISOString()
-      });
-    }
-  }
+// --- Home ---------------------------------------------------------------
+function renderHome(){const v=$('#view'),counts={before:0,progress:0,review:0,revisit:0,done:0};state.reports.forEach(r=>counts[r.status]=(counts[r.status]||0)+1);const recent=[...new Map(state.reports.map(r=>[r.property_id,r])).values()].slice(0,8);v.innerHTML=`<section class="card hero"><h2>${me.role==='admin'?'管理者':esc(me.display_name)}さん</h2><p>写真を入れるだけで、作業状況・担当・履歴・報告書までまとめて管理します。</p><button id="newReport" class="btn ghost" style="margin-top:14px">＋ 新規作業</button></section><section class="card"><h3 class="sectionTitle">現在の状況</h3><div class="kpiGrid">${[['before','作業前'],['progress','作業中'],['review','要確認'],['done','完了']].map(([k,n])=>`<button class="kpi" data-filter="${k}" style="text-align:left;cursor:pointer"><b>${counts[k]||0}</b><span>${n}</span></button>`).join('')}</div>${counts.revisit?`<div class="notice warn" style="margin-top:9px">要再訪：${counts.revisit}件</div>`:''}</section><section class="card"><div class="between"><h3 class="sectionTitle" style="margin:0">全体検索</h3><button id="searchGo" class="btn ghost small">詳細検索</button></div><input id="homeSearch" class="search" placeholder="マンション・部屋番号・作業項目・担当者"><div id="homeResults" class="list" style="margin-top:8px"></div></section><section class="card"><h3 class="sectionTitle">最近使ったマンション</h3><div class="list">${recent.length?recent.map(r=>`<button class="item" data-prop="${r.property_id}" style="text-align:left"><div class="itemTitle">${esc(r.properties?.name||'')}</div><div class="itemSub">最終作業 ${fmtDate(r.work_date)} / ${esc(r.room_no)}号室</div></button>`).join(''):'<div class="help">まだ履歴がありません。</div>'}</div></section>${me.role==='admin'?`<section class="card"><div class="between"><div><div class="sectionTitle" style="margin:0">管理</div><div class="help">ユーザー・金額・全履歴</div></div><button id="adminGo" class="btn secondary">管理画面</button></div></section>`:''}`;$('#newReport').onclick=renderNewReport;$$('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;go('work')});$('#searchGo').onclick=()=>go('search');if($('#adminGo'))$('#adminGo').onclick=()=>go('admin');$('#homeSearch').oninput=e=>renderQuick(e.target.value);$$('[data-prop]').forEach(b=>b.onclick=()=>{state.query=state.props.find(p=>p.id===b.dataset.prop)?.name||'';go('search')})}
+function renderQuick(q){const box=$('#homeResults');if(!q.trim()){box.innerHTML='';return}const rs=state.reports.filter(r=>reportMatch(r,q)).slice(0,10);box.innerHTML=rs.map(reportRow).join('');wireRows(box)}
 
-  async function saveReport(){
-    if(!currentReport) return;
-    currentReport.updatedAt=new Date().toISOString();
-    await put(stores.reports,currentReport);
-  }
+// --- Lists/search/history ----------------------------------------------
+function reportRow(r){const [n,c]=statusMeta(r.status);return `<div class="item"><div class="between"><div><div class="itemTitle">${esc(r.properties?.name||'')}　${esc(r.room_no)}号室</div><div class="itemSub">${fmtDate(r.work_date)} / 担当 ${esc(workerName(r))}<br>最終更新 ${fmtTime(r.updated_at)} ${r.updatedby?.display_name?`・${esc(r.updatedby.display_name)}`:''}</div></div><span class="status ${c}">${n}</span></div><div class="row" style="margin-top:8px"><button class="btn ghost small openReport" data-id="${r.id}">${r.status==='done'?'報告書を見る':'作業を開く'}</button>${r.status==='done'?`<button class="btn secondary small pdfDirect" data-id="${r.id}">PDF</button>`:''}</div></div>`}
+function wireRows(root=document){root.querySelectorAll('.openReport').forEach(b=>b.onclick=()=>openReport(b.dataset.id));root.querySelectorAll('.pdfDirect').forEach(b=>b.onclick=()=>openReport(b.dataset.id,true))}
+function renderWork(){const v=$('#view');const f=state.filter||'all';const tabs=[['all','すべて'],['before','作業前'],['progress','作業中'],['review','要確認'],['revisit','要再訪']];let rs=state.reports.filter(r=>r.status!=='done');if(f!=='all')rs=rs.filter(r=>r.status===f);v.innerHTML=`<div class="between"><h2 style="margin:0">作業一覧</h2><button class="btn primary small" id="newW">＋新規</button></div><div class="tabs" style="margin:12px 0">${tabs.map(([k,n])=>`<button class="tab ${f===k?'active':''}" data-f="${k}">${n}</button>`).join('')}</div><div class="list">${rs.length?rs.map(reportRow).join(''):'<div class="card help">該当する作業はありません。</div>'}</div>`;$$('[data-f]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.f;renderWork()});$('#newW').onclick=renderNewReport;wireRows(v)}
+function renderReports(){const v=$('#view'),recent=state.reports.filter(r=>r.status==='done');v.innerHTML=`<div class="between"><h2 style="margin:0">報告書</h2><span class="muted" id="repCount">${recent.length}件</span></div><input id="repSearch" class="search" style="margin:12px 0" placeholder="マンション・部屋・日付・担当者（全履歴検索）"><div id="repList" class="list">${recent.map(reportRow).join('')}</div>`;wireRows(v);let seq=0,t;$('#repSearch').oninput=e=>{clearTimeout(t);const q=e.target.value.trim();t=setTimeout(async()=>{const s=++seq;if(!q){$('#repList').innerHTML=recent.map(reportRow).join('');$('#repCount').textContent=`${recent.length}件`;return wireRows($('#repList'))}$('#repList').innerHTML='<div class="card help">全履歴を検索中…</div>';try{const rows=await serverSearchReports(q,'done','',300);if(s!==seq)return;$('#repCount').textContent=`${rows.length}件`;$('#repList').innerHTML=rows.length?rows.map(reportRow).join(''):'<div class="card help">該当なし</div>';wireRows($('#repList'))}catch(err){if(s===seq)$('#repList').innerHTML=`<div class="notice danger">${esc(err.message)}</div>`}},250)}}
+function renderSearch(){const v=$('#view');v.innerHTML=`<h2 style="margin-top:0">全体検索</h2><div class="card"><input id="globalSearch" class="search" placeholder="マンション名・部屋番号・日付・項目・担当者" value="${esc(state.query||'')}"><div class="grid2" style="margin-top:8px"><div class="field"><label>状態</label><select id="sStatus"><option value="">すべて</option><option value="before">作業前</option><option value="progress">作業中</option><option value="review">要確認</option><option value="revisit">要再訪</option><option value="done">完了</option></select></div><div class="field"><label>日付</label><input id="sDate" type="date"></div></div><div class="help" style="margin-top:7px">オンライン時は保存済みの全履歴から検索します。</div></div><div id="searchList" class="list"></div>`;let seq=0,t;const run=()=>{clearTimeout(t);t=setTimeout(async()=>{const s=++seq,q=$('#globalSearch').value,st=$('#sStatus').value,d=$('#sDate').value;$('#searchList').innerHTML='<div class="card help">検索中…</div>';try{const rs=await serverSearchReports(q,st,d,300);if(s!==seq)return;$('#searchList').innerHTML=rs.length?rs.map(reportRow).join(''):'<div class="card help">該当なし</div>';wireRows($('#searchList'))}catch(err){if(s===seq)$('#searchList').innerHTML=`<div class="notice danger">${esc(err.message)}</div>`}},180)};['globalSearch','sStatus','sDate'].forEach(id=>$('#'+id).oninput=run);run();state.query=''}
+async function renderHistory(){const v=$('#view');v.innerHTML=`<h2 style="margin-top:0">履歴</h2><div class="card"><input id="histSearch" class="search" placeholder="マンション・部屋番号（全履歴検索）"><div class="help" style="margin-top:6px">マンション → 部屋 → 日付の順で確認できます。検索時はサーバー上の全履歴を対象にします。</div></div><div id="histReports"></div><section class="card"><h3 class="sectionTitle">操作履歴</h3><div id="logList" class="timeline"><div class="help">読み込み中…</div></div></section>`;const drawRows=rs=>{const pg=new Map();for(const r of rs){const pn=r.properties?.name||'未分類';if(!pg.has(pn))pg.set(pn,new Map());const rooms=pg.get(pn);if(!rooms.has(r.room_no))rooms.set(r.room_no,[]);rooms.get(r.room_no).push(r)}$('#histReports').innerHTML=[...pg.entries()].map(([pn,rooms])=>`<details class="card" open><summary style="font-weight:900;cursor:pointer">${esc(pn)} <span class="muted" style="font-size:12px">${[...rooms.values()].reduce((n,a)=>n+a.length,0)}件</span></summary><div style="margin-top:10px">${[...rooms.entries()].sort((a,b)=>String(a[0]).localeCompare(String(b[0]),'ja',{numeric:true})).map(([room,arr])=>`<details class="item" open><summary style="font-weight:900;cursor:pointer">${esc(room)}号室 <span class="muted" style="font-size:11px">${arr.length}件</span></summary><div class="list" style="margin-top:8px">${arr.sort((a,b)=>b.work_date.localeCompare(a.work_date)).map(reportRow).join('')}</div></details>`).join('')}</div></details>`).join('')||'<div class="card help">履歴はありません。</div>';wireRows($('#histReports'))};drawRows(state.reports);let hs=0,ht;$('#histSearch').oninput=e=>{clearTimeout(ht);const q=e.target.value.trim();ht=setTimeout(async()=>{const s=++hs;if(!q)return drawRows(state.reports);$('#histReports').innerHTML='<div class="card help">全履歴を検索中…</div>';try{const rows=await serverSearchReports(q,'','',300);if(s===hs)drawRows(rows)}catch(err){if(s===hs)$('#histReports').innerHTML=`<div class="notice danger">${esc(err.message)}</div>`}},250)};const {data}=await sb.from('audit_logs').select('*,profiles(display_name,login_id),reports(room_no,work_date,properties(name))').order('created_at',{ascending:false}).limit(me.role==='admin'?500:200);state.logs=data||[];$('#logList').innerHTML=state.logs.length?state.logs.map(l=>`<div class="event"><b>${esc(actionLabel(l.action))}</b><div>${fmtTime(l.created_at)}・${esc(l.profiles?.display_name||l.profiles?.login_id||'')}</div><div>${esc(l.reports?.properties?.name||'')} ${esc(l.reports?.room_no||'')}号室 ${l.detail?.zone?`・${esc(l.detail.zone)}`:''}</div></div>`).join(''):'<div class="help">履歴はまだありません。</div>'}
+const actionLabel=a=>({create_report:'案件作成',add_photo:'写真追加',remove_photo:'写真削除',complete_report:'報告書確定',reopen_report:'再編集',set_revisit:'要再訪',edit_report:'案件更新',add_property:'マンション追加',add_work_item:'作業項目追加',edit_property:'マンション編集',edit_work_item:'作業項目編集',set_price:'単価変更',restore_report:'案件復元',restore_photo:'写真復元',create_user:'ユーザー作成',update_user:'ユーザー変更',delete_report:'案件をゴミ箱へ'}[a]||a);
 
-  function stepper(active){
-    const steps=['物件・日付','作業項目','写真振り分け','確認・PDF'];
-    return `<div class="stepper">${steps.map((s,i)=>`<span class="step ${i===active?'active':''}">${i+1}. ${s}</span>`).join('')}</div>`;
-  }
+// --- New report ---------------------------------------------------------
+function renderNewReport(){const v=$('#view');state.page='work';v.innerHTML=`<div class="between"><h2 style="margin:0">新規作業</h2><button class="btn ghost small" id="cancelNew">戻る</button></div><section class="card" style="margin-top:12px"><div class="field"><label>マンション</label><input id="propSearch" class="search" placeholder="名前を入力して検索"><div id="propMatches" class="searchResults" style="margin-top:5px"></div><input type="hidden" id="propId"></div><div class="grid2" style="margin-top:10px"><div class="field"><label>部屋番号</label><input id="roomNo" placeholder="1516"></div><div class="field"><label>作業日</label><input id="workDate" type="date" value="${today()}"></div></div><button id="addProp" class="btn secondary small" style="margin-top:10px">＋マンションを追加</button></section><section class="card"><h3 class="sectionTitle">作業項目</h3><div id="wiChecks" class="grid2">${state.workItems.map(w=>`<label class="item" style="display:flex;gap:9px;align-items:center"><input type="checkbox" value="${w.id}" ${w.name==='基本清掃'?'checked':''}><span><b>${esc(w.name)}</b>${w.kind==='basic'?'<div class="itemSub">6部位 × 作業前/後</div>':''}</span></label>`).join('')}</div><button id="addWI" class="btn secondary small" style="margin-top:10px">＋作業項目を追加</button></section><div class="row"><button id="createReport" class="btn primary" style="flex:1">作業を作成</button></div>`;$('#cancelNew').onclick=()=>go('work');$('#propSearch').oninput=()=>drawProps();$('#addProp').onclick=addProperty;$('#addWI').onclick=addWorkItem;$('#createReport').onclick=createReport;drawProps()}
+function drawProps(){const q=$('#propSearch').value.trim().toLowerCase();const arr=state.props.filter(p=>!q||p.name.toLowerCase().includes(q)).slice(0,30);$('#propMatches').innerHTML=arr.map(p=>`<button class="searchResult" data-id="${p.id}" style="border:0;width:100%;text-align:left;background:#fff"><b>${esc(p.name)}</b><div class="itemSub">${esc(p.address||'')}</div></button>`).join('')||'<div class="searchResult help">見つかりません</div>';$$('#propMatches [data-id]').forEach(b=>b.onclick=()=>{$('#propId').value=b.dataset.id;$('#propSearch').value=state.props.find(p=>p.id===b.dataset.id).name;$('#propMatches').innerHTML=`<div class="searchResult"><b>選択済み：</b>${esc($('#propSearch').value)}</div>`})}
+async function addProperty(){const name=prompt('マンション名');if(!name)return;const address=prompt('住所（任意）')||'';const row={id:uuid(),name:name.trim(),address,active:true,created_by:me.id,created_at:now(),updated_at:now()};await dbInsert('properties',row);await logAction(null,'add_property',{name});state.props.push(row);say('追加しました');drawProps()}
+async function addWorkItem(){const name=prompt('作業項目名');if(!name)return;const row={id:uuid(),name:name.trim(),kind:'generic',active:true,order_no:(state.workItems.at(-1)?.order_no||0)+10,created_by:me.id,created_at:now(),updated_at:now()};await dbInsert('work_items',row);await logAction(null,'add_work_item',{name});state.workItems.push(row);renderNewReport()}
+async function createReport(){const prop=$('#propId').value,room=$('#roomNo').value.trim(),date=$('#workDate').value,selected=$$('#wiChecks input:checked').map(x=>state.workItems.find(w=>w.id===x.value));if(!prop)return say('マンションを選択してください');if(!room)return say('部屋番号を入力してください');if(!selected.length)return say('作業項目を選択してください');const dup=state.reports.find(r=>r.property_id===prop&&r.room_no===room&&r.work_date===date);if(dup){if(confirm('同じマンション・部屋・日付の案件があります。開きますか？'))return openReport(dup.id);return}const rid=uuid(),created=now(),property=state.props.find(p=>p.id===prop);const rep={id:rid,property_id:prop,room_no:room,work_date:date,status:'before',locked:false,created_by:me.id,last_updated_by:me.id,created_at:created,updated_at:created,properties:{name:property?.name||'',address:property?.address||''},report_workers:[{user_id:me.id,profiles:{display_name:me.display_name,login_id:me.login_id}}],report_tasks:[],items:[],photos:[]};try{await dbInsert('reports',{id:rid,property_id:prop,room_no:room,work_date:date,status:'before',locked:false,created_by:me.id,last_updated_by:me.id,created_at:created,updated_at:created});await dbInsert('report_workers',{report_id:rid,user_id:me.id});let sort=0;for(const w of selected){const tid=uuid(),task={id:tid,report_id:rid,work_item_id:w.id,item_name:w.name,quantity:1,unit_price_snapshot:null,sort_no:sort++,created_at:created};rep.report_tasks.push(task);await dbInsert('report_tasks',task);if(w.kind==='basic'){for(let i=0;i<BASIC.length;i++){const item={id:uuid(),report_id:rid,work_item_id:w.id,task_id:tid,item_name:w.name,zone_name:BASIC[i],sort_no:i,created_at:created};rep.items.push(item);await dbInsert('report_items',item)}}else{const item={id:uuid(),report_id:rid,work_item_id:w.id,task_id:tid,item_name:w.name,zone_name:null,sort_no:0,created_at:created};rep.items.push(item);await dbInsert('report_items',item)}}await logAction(rid,'create_report',{property_id:prop,room_no:room,work_date:date});if(!navigator.onLine){state.reports.unshift(rep);await cacheSet('report:'+rid,rep);await cacheSet('core',{props:state.props,workItems:state.workItems,reports:state.reports,profiles:state.profiles});return renderReportEditor(rep)}await loadCore(true);openReport(rid)}catch(e){alert('作成できませんでした：'+e.message)}}
 
-  async function renderHome(){
-    viewMode='home'; currentReport=null; revokeUrls();
-    const [props,reports]=await Promise.all([getAll(stores.properties),getAll(stores.reports)]);
-    reports.sort((a,b)=>(b.workDate||'').localeCompare(a.workDate||'') || (b.updatedAt||'').localeCompare(a.updatedAt||''));
-    view.innerHTML=`
-      <section class="hero">
-        <div class="card hero-main">
-          <div class="pill">端末内保存</div>
-          <h2>写真をまとめて入れて、<br>作業前・作業後を並べる。</h2>
-          <p>物件テンプレートから項目を選び、写真を一括振り分け。最後に比較しやすいPDFへ出力します。</p>
-          <div class="hero-actions">
-            <button id="newReportBtn" class="primary-btn" type="button">＋ 新しい報告書</button>
-            <button id="templatesBtn" class="secondary-btn" type="button">物件テンプレート</button>
-          </div>
-        </div>
-        <div class="card metric">
-          <div class="metric-box"><strong>${reports.length}</strong><span>保存済み報告書</span></div>
-          <div class="metric-box"><strong>${props.length}</strong><span>物件テンプレート</span></div>
-          <div class="notice">写真・入力内容はこのブラウザのIndexedDBに保存されます。</div>
-        </div>
-      </section>
-      <section class="card" style="margin-top:16px">
-        <div class="section-title"><h2>過去の報告書</h2><span class="muted">${reports.length}件</span></div>
-        <div class="list">
-          ${reports.length ? reports.map(r=>`
-            <div class="report-row">
-              <div class="meta">
-                <div class="title">${escapeHtml(r.propertyName)}</div>
-                <div class="sub">${fmtDate(r.workDate)} ・ ${r.items.length}項目 ・ 更新 ${fmtDateTime(r.updatedAt)}</div>
-              </div>
-              <div class="toolbar">
-                <button class="small-btn open-report" data-id="${r.id}" type="button">開く</button>
-                <button class="small-btn danger-btn delete-report" data-id="${r.id}" type="button">削除</button>
-              </div>
-            </div>`).join('') : '<div class="empty">まだ報告書がありません。</div>'}
-        </div>
-      </section>`;
-    document.getElementById('newReportBtn').addEventListener('click',renderNewReportStart);
-    document.getElementById('templatesBtn').addEventListener('click',renderTemplates);
-    document.querySelectorAll('.open-report').forEach(b=>b.addEventListener('click',()=>openReport(b.dataset.id)));
-    document.querySelectorAll('.delete-report').forEach(b=>b.addEventListener('click',()=>deleteReport(b.dataset.id)));
-  }
+// --- Report editor ------------------------------------------------------
+async function openReport(id,pdfOnly=false){state.current=id;$('#view').innerHTML='<div class="card">読み込み中…</div>';let r;if(!navigator.onLine){r=await cacheGet('report:'+id);if(!r)return alert('この案件はオフライン用キャッシュにありません。オンライン時に一度開いてください。')}else{const q=await sb.from('reports').select('*,properties(name,address),report_workers(user_id,profiles(display_name,login_id)),report_tasks(*),completed:profiles!reports_completed_by_fkey(display_name,login_id)').eq('id',id).single();if(q.error)return alert(q.error.message);r=q.data;const {data:items}=await sb.from('report_items').select('*').eq('report_id',id).order('sort_no');const {data:photos}=await sb.from('photos').select('*').in('report_item_id',(items||[]).map(x=>x.id)).is('deleted_at',null);r.items=items||[];r.photos=photos||[];for(const p of r.photos){try{p._url=await photoUrl(p)}catch{}}await cacheSet('report:'+id,r)}state.current=r;if(pdfOnly&&r.status==='done')return renderPdf(r);renderReportEditor(r)}
+async function photoUrl(p){if(!p)return'';if(p._url)return p._url;if(signed.has(p.id))return signed.get(p.id);if(!navigator.onLine)return'';const {data}=await sb.storage.from('report-photos').createSignedUrl(p.storage_path,3600);const u=data?.signedUrl||'';signed.set(p.id,u);p._url=u;return u}
+function photoFor(r,itemId,phase){return r.photos.find(p=>p.report_item_id===itemId&&p.phase===phase)}
+async function renderReportEditor(r){const [sn,sc]=statusMeta(r.status);const groups=[...new Map((r.report_tasks||[]).map(t=>[t.id,t])).values()].sort((a,b)=>a.sort_no-b.sort_no);const total=r.items.length*2,got=r.items.reduce((n,i)=>n+(photoFor(r,i.id,'before')?1:0)+(photoFor(r,i.id,'after')?1:0),0);const pct=total?Math.round(got/total*100):0;const editable=!r.locked;const v=$('#view');v.innerHTML=`<div class="between"><div><h2 style="margin:0">${esc(r.properties?.name||'')} ${esc(r.room_no)}号室</h2><div class="itemSub">${fmtDate(r.work_date)} / 担当 ${esc(workerName(r))}</div></div><span class="status ${sc}">${sn}</span></div><section class="card" style="margin-top:12px"><div class="between"><b>写真 ${got}/${total}</b><span class="muted">${pct}%</span></div><div class="progress" style="margin-top:7px"><span style="width:${pct}%"></span></div>${r.revisit_reason?`<div class="notice warn" style="margin-top:9px"><b>要再訪：</b>${esc(r.revisit_reason)}</div>`:''}<div class="row" style="margin-top:9px"><button id="addWorker" class="btn secondary small" ${editable?'':'disabled'}>担当者追加</button><button id="memoBtn" class="btn ghost small">内部メモ</button><button id="revisitBtn" class="btn ghost small" ${editable?'':'disabled'}>${r.status==='revisit'?'再訪解除':'要再訪'}</button>${r.status==='done'?`<button id="pdfBtn" class="btn primary small">報告書を見る</button>`:''}${r.locked&&me.role==='admin'?`<button id="reopenBtn" class="btn danger small">再編集</button>`:''}${me.role==='admin'?`<button id="deleteReportBtn" class="btn danger small">案件をゴミ箱へ</button>`:''}</div></section><div id="taskSections"></div>${editable?`<section class="card"><h3 class="sectionTitle">完成前チェック</h3><div id="reviewBox" class="help">写真を確認中…</div><div class="row" style="margin-top:10px"><button id="aiCheck" class="btn secondary">写真内容チェック</button><button id="completeBtn" class="btn primary">報告書を確定</button></div></section>`:''}`;for(const t of groups){const its=r.items.filter(i=>i.task_id===t.id);const sec=document.createElement('section');sec.className='card';sec.innerHTML=`<div class="between"><h3 class="sectionTitle" style="margin:0">${esc(t.item_name)}</h3><span class="muted">${its.reduce((n,i)=>n+(photoFor(r,i.id,'before')?1:0)+(photoFor(r,i.id,'after')?1:0),0)}/${its.length*2}</span></div><div class="slotTable" style="margin-top:10px">${its.map(i=>slotRow(r,i,editable)).join('')}</div>${editable&&t.item_name==='基本清掃'?`<div class="grid2" style="margin-top:8px"><label class="btn secondary" style="text-align:center">作業前をまとめて登録<input type="file" multiple accept="image/*" data-bulk="before" data-task="${t.id}" style="display:none"></label><label class="btn secondary" style="text-align:center">作業後をまとめて登録<input type="file" multiple accept="image/*" data-bulk="after" data-task="${t.id}" style="display:none"></label></div>`:editable?`<button class="btn secondary small addPair" data-task="${t.id}" style="margin-top:8px">＋ 写真組を追加</button>`:''}`;$('#taskSections').appendChild(sec)}await hydratePhotos(r);wireReport(r,editable);if(editable)reviewReport(r)}
+function slotRow(r,i,editable){const b=photoFor(r,i.id,'before'),a=photoFor(r,i.id,'after');return `<div class="slotRow"><div class="zone">${esc(i.zone_name||i.item_name)}</div><div class="slot"><div class="slotLabel">作業前</div>${photoCell(b,i,'before',editable)}</div><div class="slot"><div class="slotLabel">作業後</div>${photoCell(a,i,'after',editable)}</div></div>`}
+function photoCell(p,i,phase,editable){return `<div class="photoBox ${p?'has':''}" id="box-${i.id}-${phase}">${p?`<div class="help">画像読込中</div>${p.ai_warning?'<span class="warn">要確認</span>':''}`:editable?`<label class="addPhoto">＋ 写真<input type="file" accept="image/*" capture="environment" data-item="${i.id}" data-phase="${phase}"></label>`:'<span class="help">未登録</span>'}</div>${p&&editable?`<button class="btn ghost small removePhoto" data-photo="${p.id}" data-item="${i.id}" data-phase="${phase}">削除</button>`:''}`}
+async function hydratePhotos(r){for(const p of r.photos){const u=await photoUrl(p),box=$(`#box-${p.report_item_id}-${p.phase}`);if(box)box.innerHTML=`<img src="${u}" alt="">${p.ai_warning?`<span class="warn">要確認</span>`:''}`}}
+function wireReport(r,editable){$$('input[data-item]').forEach(inp=>inp.onchange=e=>uploadPhoto(r,e.target.dataset.item,e.target.dataset.phase,e.target.files[0]));$$('.removePhoto').forEach(b=>b.onclick=()=>removePhoto(r,b.dataset.photo));$$('input[data-bulk]').forEach(inp=>inp.onchange=e=>bulkUpload(r,e.target.dataset.task,e.target.dataset.bulk,[...e.target.files]));$$('.addPair').forEach(b=>b.onclick=()=>addPhotoPair(r,b.dataset.task));if($('#pdfBtn'))$('#pdfBtn').onclick=()=>renderPdf(r);if($('#aiCheck'))$('#aiCheck').onclick=()=>runAI(r);if($('#completeBtn'))$('#completeBtn').onclick=()=>completeReport(r);if($('#addWorker'))$('#addWorker').onclick=()=>addWorker(r);if($('#memoBtn'))$('#memoBtn').onclick=()=>editMemo(r);if($('#revisitBtn'))$('#revisitBtn').onclick=()=>toggleRevisit(r);if($('#reopenBtn'))$('#reopenBtn').onclick=()=>reopenReport(r);if($('#deleteReportBtn'))$('#deleteReportBtn').onclick=()=>softDeleteReport(r)}
+async function addPhotoPair(r,taskId){const t=(r.report_tasks||[]).find(x=>x.id===taskId);if(!t)return;const its=(r.items||[]).filter(x=>x.task_id===taskId),next=its.length+1;const label=prompt('写真組の名前（任意）',`写真${next}`);if(label===null)return;const item={id:uuid(),report_id:r.id,work_item_id:t.work_item_id,task_id:t.id,item_name:t.item_name,zone_name:label.trim()||`写真${next}`,sort_no:Math.max(-1,...its.map(x=>Number(x.sort_no)||0))+1,created_at:now()};await dbInsert('report_items',item);r.items.push(item);r.updated_at=now();await dbUpdate('reports',{last_updated_by:me.id,updated_at:r.updated_at,status:autoStatus(r)},{id:r.id});await logAction(r.id,'edit_report',{add_photo_pair:true,task_id:taskId,label:item.zone_name});await cacheSet('report:'+r.id,r);navigator.onLine?openReport(r.id):renderReportEditor(r)}
+async function uploadPhoto(r,itemId,phase,file){if(!file)return;const old=photoFor(r,itemId,phase),pid=old?.id||uuid(),ext=(file.name.split('.').pop()||'jpg').toLowerCase(),path=`${r.id}/${itemId}/${phase}-${pid}.${ext}`;say('写真を保存中…');let localUrl='';try{localUrl=URL.createObjectURL(file)}catch{}if(navigator.onLine){const {error}=await sb.storage.from('report-photos').upload(path,file,{contentType:file.type||'image/jpeg',upsert:true});if(error){await enqueue('upload',{path,contentType:file.type||'image/jpeg'},file)}}else await enqueue('upload',{path,contentType:file.type||'image/jpeg'},file);const row={id:pid,report_item_id:itemId,phase,storage_path:path,original_name:file.name,captured_at:file.lastModified?new Date(file.lastModified).toISOString():null,uploaded_by:me.id,created_at:old?.created_at||now(),_url:localUrl};if(old)await dbUpdate('photos',{...row,_url:undefined},{id:pid});else await dbInsert('photos',{...row,_url:undefined});r.photos=[...r.photos.filter(x=>!(x.report_item_id===itemId&&x.phase===phase)),row];r.status=autoStatus(r);r.updated_at=now();r.last_updated_by=me.id;await dbUpdate('reports',{last_updated_by:me.id,updated_at:r.updated_at,status:r.status},{id:r.id});await logAction(r.id,'add_photo',{item_id:itemId,phase});signed.delete(pid);await cacheSet('report:'+r.id,r);navigator.onLine?openReport(r.id):renderReportEditor(r)}
+async function bulkUpload(r,taskId,phase,files){const its=r.items.filter(i=>i.task_id===taskId);for(let i=0;i<Math.min(files.length,its.length);i++)await uploadPhotoSilent(r,its[i].id,phase,files[i]);r.status=autoStatus(r);r.updated_at=now();await dbUpdate('reports',{last_updated_by:me.id,updated_at:r.updated_at,status:r.status},{id:r.id});await logAction(r.id,'add_photo',{task_id:taskId,phase,count:Math.min(files.length,its.length)});await cacheSet('report:'+r.id,r);navigator.onLine?openReport(r.id):renderReportEditor(r)}
+async function uploadPhotoSilent(r,itemId,phase,file){const old=photoFor(r,itemId,phase),pid=old?.id||uuid(),ext=(file.name.split('.').pop()||'jpg').toLowerCase(),path=`${r.id}/${itemId}/${phase}-${pid}.${ext}`;let localUrl='';try{localUrl=URL.createObjectURL(file)}catch{}if(navigator.onLine){const {error}=await sb.storage.from('report-photos').upload(path,file,{contentType:file.type||'image/jpeg',upsert:true});if(error)await enqueue('upload',{path,contentType:file.type||'image/jpeg'},file)}else await enqueue('upload',{path,contentType:file.type||'image/jpeg'},file);const row={id:pid,report_item_id:itemId,phase,storage_path:path,original_name:file.name,captured_at:file.lastModified?new Date(file.lastModified).toISOString():null,uploaded_by:me.id,created_at:old?.created_at||now(),_url:localUrl};if(old)await dbUpdate('photos',{...row,_url:undefined},{id:pid});else await dbInsert('photos',{...row,_url:undefined});r.photos=[...r.photos.filter(x=>!(x.report_item_id===itemId&&x.phase===phase)),row]}
+async function removePhoto(r,pid){const p=r.photos.find(x=>x.id===pid);if(!p||!confirm('この写真をゴミ箱へ移動しますか？\n管理者画面から復元できます。'))return;await dbUpdate('photos',{deleted_at:now(),deleted_by:me.id},{id:pid});r.photos=r.photos.filter(x=>x.id!==pid);r.status='progress';r.updated_at=now();await dbUpdate('reports',{last_updated_by:me.id,updated_at:r.updated_at,status:r.status},{id:r.id});await logAction(r.id,'remove_photo',{photo_id:pid,soft_delete:true});await cacheSet('report:'+r.id,r);navigator.onLine?openReport(r.id):renderReportEditor(r)}
+function autoStatus(r){const before=r.items.every(i=>photoFor(r,i.id,'before')),after=r.items.every(i=>photoFor(r,i.id,'after'));const anyAfter=r.items.some(i=>photoFor(r,i.id,'after'));if(before&&after)return r.photos.some(p=>p.ai_warning)?'review':'progress';if(anyAfter)return'progress';return'before'}
+function reviewReport(r){const missing=[];r.items.forEach(i=>{if(!photoFor(r,i.id,'before'))missing.push(`${i.zone_name||i.item_name}・作業前`);if(!photoFor(r,i.id,'after'))missing.push(`${i.zone_name||i.item_name}・作業後`)});const warns=r.photos.filter(p=>p.ai_warning);$('#reviewBox').innerHTML=missing.length?`<div class="notice danger"><b>不足 ${missing.length}件</b><br>${missing.slice(0,10).map(esc).join(' / ')}</div>`:warns.length?`<div class="notice warn"><b>写真内容の確認 ${warns.length}件</b><br>${warns.map(p=>esc(p.ai_warning)).join('<br>')}</div>`:'<div class="notice">必要写真はすべて揃っています。</div>';$('#completeBtn').disabled=!!missing.length}
+async function completeReport(r){const missing=r.items.some(i=>!photoFor(r,i.id,'before')||!photoFor(r,i.id,'after'));if(missing)return say('写真が不足しています');if(r.photos.some(p=>!p.ai_checked_at)){alert('報告書を確定する前に「写真内容チェック」を実行してください。');return}const warns=r.photos.filter(p=>p.ai_warning);if(warns.length&&!confirm('要確認の写真があります。確認済みとして報告書を確定しますか？'))return;if(!confirm('報告書を確定すると作業者からは編集できなくなります。確定しますか？'))return;await dbUpdate('reports',{status:'done',locked:true,completed_by:me.id,completed_at:now(),last_updated_by:me.id,updated_at:now()},{id:r.id});await logAction(r.id,'complete_report',{warnings:warns.length});await loadCore(true);openReport(r.id,true)}
 
-  async function renderNewReportStart(){
-    viewMode='report';
-    const props=await getAll(stores.properties);
-    if(!props.length){ await renderTemplates(); return; }
-    view.innerHTML=`
-      ${stepper(0)}
-      <section class="card">
-        <h2>物件と作業日</h2>
-        <div class="grid-2">
-          <div class="field">
-            <label for="propertySelect">マンション名</label>
-            <select id="propertySelect">
-              <option value="">選択してください</option>
-              ${props.sort((a,b)=>a.name.localeCompare(b.name,'ja')).map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}
-            </select>
-            <div class="help">物件を選ぶと、その物件に登録した作業項目テンプレートを読み込みます。</div>
-          </div>
-          <div class="field">
-            <label for="workDate">作業日</label>
-            <input id="workDate" type="date" value="${localDateISO()}">
-            <div class="help">新規作成時は端末の今日の日付。過去・未来の日付にも変更できます。</div>
-          </div>
-        </div>
-        <div class="sticky-actions">
-          <button id="cancelBtn" class="ghost-btn" type="button">キャンセル</button>
-          <button id="nextBtn" class="primary-btn" type="button">次へ</button>
-        </div>
-      </section>`;
-    document.getElementById('cancelBtn').addEventListener('click',renderHome);
-    document.getElementById('nextBtn').addEventListener('click',async()=>{
-      const propertyId=document.getElementById('propertySelect').value;
-      const workDate=document.getElementById('workDate').value;
-      if(!propertyId){ showToast('マンション名を選択してください'); return; }
-      if(!workDate){ showToast('作業日を選択してください'); return; }
-      const p=await getOne(stores.properties,propertyId);
-      currentReport={
-        id:id('report'), propertyId:p.id, propertyName:p.name, propertyAddress:p.address||'',
-        workDate, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
-        items:[], unassignedIds:[]
-      };
-      currentReport.templateItems=[...(p.items||[])];
-      await saveReport();
-      renderItems();
-    });
-  }
+async function softDeleteReport(r){if(me.role!=='admin'||!confirm('この案件をゴミ箱へ移動しますか？'))return;await dbUpdate('reports',{deleted_at:now(),deleted_by:me.id,last_updated_by:me.id,updated_at:now()},{id:r.id});await logAction(r.id,'delete_report',{soft_delete:true});await loadCore(true);go('work')}
+async function reopenReport(r){if(me.role!=='admin'||!confirm('確定済み報告書を再編集しますか？履歴に残ります。'))return;await dbUpdate('reports',{locked:false,status:'review',revision_no:(r.revision_no||1)+1,reopened_at:now(),reopened_by:me.id,last_updated_by:me.id,updated_at:now()},{id:r.id});await logAction(r.id,'reopen_report',{revision:(r.revision_no||1)+1});openReport(r.id)}
+async function toggleRevisit(r){if(r.status==='revisit'){await dbUpdate('reports',{status:autoStatus(r),revisit_reason:null,last_updated_by:me.id,updated_at:now()},{id:r.id});return openReport(r.id)}const reason=prompt('再訪理由');if(!reason)return;await dbUpdate('reports',{status:'revisit',revisit_reason:reason,last_updated_by:me.id,updated_at:now()},{id:r.id});await logAction(r.id,'set_revisit',{reason});openReport(r.id)}
+async function editMemo(r){const m=prompt('内部メモ（報告書には表示しません）',r.internal_memo||'');if(m===null)return;await dbUpdate('reports',{internal_memo:m,last_updated_by:me.id,updated_at:now()},{id:r.id});await logAction(r.id,'edit_report',{internal_memo:true});openReport(r.id)}
+async function addWorker(r){let ps=[];if(me.role==='admin'){ps=state.profiles.filter(p=>p.active)}else{const {data}=await sb.from('profiles').select('*').eq('active',true);ps=data||[]}ps=ps.filter(p=>!(r.report_workers||[]).some(w=>w.user_id===p.id));if(!ps.length)return say('追加できる担当者がいません');const names=ps.map((p,i)=>`${i+1}: ${p.display_name||(p.role==='admin'?'管理者':p.login_id)}`).join('\n');const n=Number(prompt('追加する担当者の番号\n'+names));const p=ps[n-1];if(!p)return;await dbInsert('report_workers',{report_id:r.id,user_id:p.id});await logAction(r.id,'edit_report',{add_worker:p.id});openReport(r.id)}
 
-  function renderItems(){
-    if(!currentReport) return;
-    const template=currentReport.templateItems || [];
-    const selected=new Set(currentReport.items.map(x=>x.name));
-    view.innerHTML=`
-      ${stepper(1)}
-      <section class="card">
-        <div class="section-title"><h2>今回の作業項目</h2><span class="muted">${escapeHtml(currentReport.propertyName)}</span></div>
-        <div id="itemChecks" class="check-grid">
-          ${template.map((name,i)=>`
-            <label class="check-item">
-              <input type="checkbox" value="${escapeHtml(name)}" ${selected.has(name)?'checked':''}>
-              <span>${escapeHtml(name)}</span>
-            </label>`).join('')}
-        </div>
-        <div class="grid-2" style="margin-top:14px">
-          <div class="field">
-            <label for="customItem">その他の項目を追加</label>
-            <input id="customItem" type="text" placeholder="例：浴室コーキング補修">
-          </div>
-          <div class="field" style="align-content:end">
-            <button id="addCustomBtn" class="secondary-btn" type="button">項目を追加</button>
-          </div>
-        </div>
-        <div class="sticky-actions">
-          <button id="backBtn" class="ghost-btn" type="button">戻る</button>
-          <button id="toPhotosBtn" class="primary-btn" type="button">写真振り分けへ</button>
-        </div>
-      </section>`;
-    document.getElementById('backBtn').addEventListener('click',renderReportInfoEdit);
-    document.getElementById('addCustomBtn').addEventListener('click',()=>{
-      const input=document.getElementById('customItem');
-      const name=input.value.trim(); if(!name) return;
-      if(!currentReport.templateItems.includes(name)) currentReport.templateItems.push(name);
-      const existing=currentReport.items.find(x=>x.name===name);
-      if(!existing) currentReport.items.push({id:id('item'),name,beforeIds:[],afterIds:[]});
-      renderItems();
-    });
-    document.getElementById('toPhotosBtn').addEventListener('click',async()=>{
-      const checked=[...document.querySelectorAll('#itemChecks input:checked')].map(x=>x.value);
-      if(!checked.length){ showToast('作業項目を1つ以上選択してください'); return; }
-      const oldMap=new Map(currentReport.items.map(x=>[x.name,x]));
-      currentReport.items=checked.map(name=>oldMap.get(name)||{id:id('item'),name,beforeIds:[],afterIds:[]});
-      await saveReport(); await renderPhotos();
-    });
-  }
+// --- AI check -----------------------------------------------------------
+async function loadAI(){if(aiModel)return aiModel;if(aiLoad)return aiLoad;aiLoad=(async()=>{const js=(src)=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)});if(!window.tf)await js('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js');if(!window.mobilenet)await js('https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js');return aiModel=await mobilenet.load()})();return aiLoad}
+function expectedWords(zone){return{トイレ:['toilet','seat','bathroom'],風呂:['bathtub','shower','bathroom'],台所:['stove','oven','refrigerator','sink','kitchen'],玄関:['door','shoe','hall'],ベランダ:['patio','balcony','railing','outdoor'],居室:['room','bed','sofa','table','chair']}[zone]||[]}
+function obviousOther(pred,zone){const txt=pred.map(x=>x.className.toLowerCase()).join(' ');const strong={トイレ:['toilet'],風呂:['bathtub','shower'],台所:['stove','oven','refrigerator'],玄関:['door'],ベランダ:['patio'],居室:['bed','sofa']};for(const[z,ws]of Object.entries(strong)){if(z!==zone&&ws.some(w=>txt.includes(w)))return z}return null}
+async function visualSignature(url){const img=new Image();img.crossOrigin='anonymous';await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url});const c=document.createElement('canvas');c.width=12;c.height=12;const x=c.getContext('2d');x.drawImage(img,0,0,12,12);const d=x.getImageData(0,0,12,12).data,a=[];for(let i=0;i<d.length;i+=4)a.push(.299*d[i]+.587*d[i+1]+.114*d[i+2]);const m=a.reduce((s,v)=>s+v,0)/a.length;return a.map(v=>v-m)}
+function signatureDiff(a,b){if(!a||!b||a.length!==b.length)return 0;return a.reduce((s,v,i)=>s+Math.abs(v-b[i]),0)/a.length}
+async function runAI(r){say('AIモデルを読み込み中…');let model;try{model=await loadAI()}catch{return alert('AIチェックを読み込めませんでした。通信状況を確認してください。')}let n=0;for(const i of r.items){for(const ph of ['before','after']){const p=photoFor(r,i.id,ph);if(!p)continue;let warning=null;const u=await photoUrl(p);if(i.zone_name){const img=new Image();img.crossOrigin='anonymous';await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=u});const pred=await model.classify(img,5);const other=obviousOther(pred,i.zone_name);if(other)warning=`${i.zone_name}に登録されていますが、${other}の写真である可能性があります。`}if(ph==='after'){const bp=photoFor(r,i.id,'before');if(bp){try{const d=signatureDiff(await visualSignature(await photoUrl(bp)),await visualSignature(u));if(d>58)warning=(warning?warning+' ':'')+'作業前後で撮影構図が大きく異なる可能性があります。'}catch{}}}await dbUpdate('photos',{ai_warning:warning,ai_checked_at:now()},{id:p.id});p.ai_warning=warning;if(warning)n++}}r.status=n?'review':autoStatus(r);await dbUpdate('reports',{status:r.status,last_updated_by:me.id,updated_at:now()},{id:r.id});await logAction(r.id,'edit_report',{ai_check:true,warnings:n});await cacheSet('report:'+r.id,r);say(n?`${n}件を要確認にしました`:'明らかな違いは見つかりませんでした');openReport(r.id)}
 
-  function renderReportInfoEdit(){
-    if(!currentReport) return;
-    view.innerHTML=`
-      ${stepper(0)}
-      <section class="card">
-        <h2>物件と作業日</h2>
-        <div class="grid-2">
-          <div class="field"><label>マンション名</label><input id="propNameEdit" type="text" value="${escapeHtml(currentReport.propertyName)}"></div>
-          <div class="field"><label>作業日</label><input id="workDateEdit" type="date" value="${currentReport.workDate}"></div>
-        </div>
-        <div class="sticky-actions">
-          <button id="homeEditBtn" class="ghost-btn" type="button">ホーム</button>
-          <button id="saveInfoBtn" class="primary-btn" type="button">保存して次へ</button>
-        </div>
-      </section>`;
-    document.getElementById('homeEditBtn').addEventListener('click',renderHome);
-    document.getElementById('saveInfoBtn').addEventListener('click',async()=>{
-      currentReport.propertyName=document.getElementById('propNameEdit').value.trim()||currentReport.propertyName;
-      currentReport.workDate=document.getElementById('workDateEdit').value||currentReport.workDate;
-      await saveReport(); renderItems();
-    });
-  }
+// --- PDF ---------------------------------------------------------------
+async function renderPdf(r){const v=$('#view');v.innerHTML='<div class="card">報告書を作成中…</div>';if(!r.items){const {data:i}=await sb.from('report_items').select('*').eq('report_id',r.id).order('sort_no');const {data:p}=await sb.from('photos').select('*').in('report_item_id',(i||[]).map(x=>x.id)).is('deleted_at',null);r.items=i||[];r.photos=p||[]}for(const p of r.photos||[])if(!p._url)p._url=await photoUrl(p);const tasks=[...(r.report_tasks||[])].sort((a,b)=>(a.sort_no||0)-(b.sort_no||0));const sections=tasks.map(t=>{const its=(r.items||[]).filter(i=>i.task_id===t.id).sort((a,b)=>(a.sort_no||0)-(b.sort_no||0));return `<section style="margin-top:14px"><div style="font-size:15px;font-weight:900;background:#eef2f5;border-left:4px solid #1c3c50;padding:6px 8px;margin-bottom:7px">${esc(t.item_name)}</div>${its.map(i=>{const b=photoFor(r,i.id,'before'),a=photoFor(r,i.id,'after'),label=i.zone_name||i.item_name;return `<div class="pdfPair"><div class="pdfCell"><b>${esc(label)}　作業前</b><img src="${b?b._url||'':''}"></div><div class="pdfCell"><b>${esc(label)}　作業後</b><img src="${a?a._url||'':''}"></div></div>`}).join('')}</section>`}).join('');v.innerHTML=`<div class="between noPrint"><button id="pdfBack" class="btn ghost small">戻る</button><div class="row"><button id="printPdf" class="btn secondary">印刷</button><button id="downloadPdf" class="btn primary">PDF保存</button></div></div><div class="paperWrap" style="margin-top:10px"><div id="paper" class="paper"><div class="pdfTitle">作業報告書</div><div class="pdfMeta"><div><b>マンション：</b>${esc(r.properties?.name||'')}</div><div><b>部屋：</b>${esc(r.room_no)}号室</div><div><b>作業日：</b>${fmtDate(r.work_date)}</div><div><b>担当：</b>${esc(workerName(r))}</div></div>${sections}<div style="font-size:9px;color:#666;margin-top:8px">Revision ${r.revision_no||1} / 完了 ${fmtTime(r.completed_at)}</div></div></div>`;$('#pdfBack').onclick=()=>openReport(r.id);$('#printPdf').onclick=()=>window.print();$('#downloadPdf').onclick=()=>{const safe=(r.properties?.name||'報告書').replace(/[\/:*?"<>|]/g,'_'),name=`${r.work_date}_${safe}_${r.room_no}号室_報告書.pdf`;if(window.html2pdf)html2pdf().set({margin:0,filename:name,image:{type:'jpeg',quality:.94},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).from($('#paper')).save();else window.print()}}
 
-  async function renderPhotos(){
-    if(!currentReport) return;
-    revokeUrls();
-    const allPhotoIds=[...currentReport.unassignedIds,...currentReport.items.flatMap(i=>[...i.beforeIds,...i.afterIds])];
-    const urlEntries=await Promise.all(allPhotoIds.map(async pid=>[pid,await photoUrl(pid)]));
-    const urlMap=new Map(urlEntries);
-    view.innerHTML=`
-      ${stepper(2)}
-      <section class="card">
-        <div class="section-title">
-          <div><h2>写真を一括アップロード</h2><div class="help">${escapeHtml(currentReport.propertyName)} ／ ${fmtDate(currentReport.workDate)}</div></div>
-          <span class="pill">${allPhotoIds.length}枚</span>
-        </div>
-        <label class="uploader" for="photoInput">
-          <strong>＋ 写真をまとめて選択</strong>
-          <div class="help" style="margin-top:5px">iPhoneの写真ライブラリから複数枚を一度に追加できます。</div>
-        </label>
-        <input id="photoInput" type="file" accept="image/*" multiple>
-      </section>
+// --- Admin -------------------------------------------------------------
+async function renderAdmin(){if(me.role!=='admin')return go('home');const v=$('#view');v.innerHTML=`<div class="between"><h2 style="margin:0">管理画面</h2><button class="btn ghost small" id="aBack">ホーム</button></div><div class="tabs" style="margin:12px 0"><button class="tab active" data-at="users">ユーザー</button><button class="tab" data-at="masters">マンション・項目</button><button class="tab" data-at="money">発注金額</button><button class="tab" data-at="audit">全履歴</button><button class="tab" data-at="trash">ゴミ箱</button><button class="tab" data-at="export">出力</button></div><div id="adminBody"></div>`;$('#aBack').onclick=()=>go('home');$$('[data-at]').forEach(b=>b.onclick=()=>{$$('[data-at]').forEach(x=>x.classList.remove('active'));b.classList.add('active');drawAdmin(b.dataset.at)});drawAdmin('users')}
+async function adminInvoke(body){const {data,error}=await sb.functions.invoke('admin-users',{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data}
+async function drawAdmin(tab){const b=$('#adminBody');if(tab==='users'){b.innerHTML='<div class="card">読み込み中…</div>';let users;try{users=(await adminInvoke({action:'list'})).users}catch(e){return b.innerHTML=`<div class="notice danger">${esc(e.message)}</div>`}b.innerHTML=`<section class="card"><div class="between"><h3 class="sectionTitle" style="margin:0">ユーザー管理</h3><button id="newUser" class="btn primary small">＋ユーザー</button></div><div class="list" style="margin-top:10px">${users.map(u=>`<div class="item"><div class="between"><div><div class="itemTitle">${esc(u.display_name||'(名前未登録)')}</div><div class="itemSub">ID: ${esc(u.login_id||'')} / ${u.role==='admin'?'管理者':'作業者'}</div></div><span class="status ${u.active?'s-done':'s-none'}">${u.active?'有効':'停止'}</span></div><div class="row" style="margin-top:8px"><button class="btn ghost small editUser" data-id="${u.id}" data-login="${esc(u.login_id||'')}" data-role="${u.role}" data-active="${u.active}">編集</button></div></div>`).join('')}</div></section>`;$('#newUser').onclick=createUser;$$('.editUser').forEach(x=>x.onclick=()=>editUser(x,users.find(u=>u.id===x.dataset.id)))}else if(tab==='masters'){let priceData={items:[]};try{priceData=await adminInvoke({action:'prices'})}catch(e){return b.innerHTML=`<div class="notice danger">${esc(e.message)}</div>`}const pm=new Map((priceData.items||[]).map(x=>[x.id,x.unit_price]));state.workItems.forEach(w=>w.unit_price=pm.has(w.id)?pm.get(w.id):null);b.innerHTML=`<div class="adminGrid"><section class="card"><div class="between"><h3 class="sectionTitle" style="margin:0">マンション ${state.props.length}件</h3><button class="btn secondary small" id="aAddProp">＋追加</button></div><input id="aPropQ" class="search" style="margin:9px 0" placeholder="検索"><div id="aProps" class="list"></div></section><section class="card"><div class="between"><h3 class="sectionTitle" style="margin:0">作業項目</h3><button class="btn secondary small" id="aAddWI">＋追加</button></div><div class="list" style="margin-top:9px">${state.workItems.map(w=>`<div class="item"><b>${esc(w.name)}</b><div class="itemSub">単価 ${w.unit_price==null?'未設定':Number(w.unit_price).toLocaleString()+'円'}</div><button class="btn ghost small priceEdit" data-id="${w.id}" style="margin-top:6px">単価設定</button></div>`).join('')}</div></section></div>`;const drawP=()=>{$('#aProps').innerHTML=state.props.filter(p=>p.name.includes($('#aPropQ').value)).slice(0,100).map(p=>`<div class="item"><b>${esc(p.name)}</b><div class="itemSub">${esc(p.address||'')}</div></div>`).join('')};$('#aPropQ').oninput=drawP;drawP();$('#aAddProp').onclick=addProperty;$('#aAddWI').onclick=addWorkItem;$$('.priceEdit').forEach(x=>x.onclick=async()=>{const w=state.workItems.find(y=>y.id===x.dataset.id);const p=prompt(`${w.name} の発注単価`,w.unit_price??'');if(p===null)return;const val=p===''?null:Number(p);try{await adminInvoke({action:'set_price',work_item_id:w.id,unit_price:val});w.unit_price=val;say('単価を更新しました');drawAdmin('masters')}catch(e){alert(e.message)}})}else if(tab==='money'){b.innerHTML='<div class="card">集計中…</div>';let fin;try{fin=await adminInvoke({action:'finance'})}catch(e){return b.innerHTML=`<div class="notice danger">${esc(e.message)}</div>`}const recent=(fin.rows||[]).slice(0,12);b.innerHTML=`<section class="card"><h3 class="sectionTitle">発注金額</h3><div class="kpiGrid"><div class="kpi"><b>${fin.count||0}</b><span>完了件数</span></div><div class="kpi"><b>¥${Number(fin.total||0).toLocaleString()}</b><span>発注金額合計</span></div></div><div class="notice" style="margin-top:10px">案件作成時の単価を固定保存するため、後から単価を変更しても過去の金額は変わりません。</div></section><section class="card"><h3 class="sectionTitle">最近の完了</h3><div class="list">${recent.map(r=>`<div class="item"><div class="between"><div><b>${esc(r.properties?.name||'')} ${esc(r.room_no)}号室</b><div class="itemSub">${fmtDate(r.work_date)} / ${esc((r.workers||[]).join('・'))}</div></div><b>¥${Number(r.amount||0).toLocaleString()}</b></div></div>`).join('')||'<div class="help">完了案件はありません。</div>'}</div></section>`}else if(tab==='audit'){const {data}=await sb.from('audit_logs').select('*,profiles(display_name,login_id),reports(room_no,work_date,properties(name))').order('created_at',{ascending:false}).limit(500);b.innerHTML=`<section class="card"><h3 class="sectionTitle">全操作履歴</h3><div class="timeline">${(data||[]).map(l=>`<div class="event"><b>${esc(actionLabel(l.action))}</b><div>${fmtTime(l.created_at)}・${esc(l.profiles?.display_name||l.profiles?.login_id||'')}</div><div>${esc(l.reports?.properties?.name||'')} ${esc(l.reports?.room_no||'')}</div></div>`).join('')}</div></section>`}else if(tab==='trash'){const [rr,pp]=await Promise.all([sb.from('reports').select('id,room_no,work_date,deleted_at,properties(name)').not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(100),sb.from('photos').select('id,report_item_id,phase,storage_path,deleted_at,report_items(report_id,zone_name,item_name,reports(room_no,properties(name)))').not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(100)]);b.innerHTML=`<section class="card"><h3 class="sectionTitle">案件ゴミ箱</h3><div class="list">${(rr.data||[]).map(x=>`<div class="item"><b>${esc(x.properties?.name||'')} ${esc(x.room_no)}号室</b><div class="itemSub">${fmtDate(x.work_date)} / 削除 ${fmtTime(x.deleted_at)}</div><button class="btn secondary small restoreReport" data-id="${x.id}" style="margin-top:6px">復元</button></div>`).join('')||'<div class="help">空です</div>'}</div></section><section class="card"><h3 class="sectionTitle">写真ゴミ箱</h3><div class="list">${(pp.data||[]).map(x=>`<div class="item"><b>${esc(x.report_items?.reports?.properties?.name||'')} ${esc(x.report_items?.reports?.room_no||'')}号室</b><div class="itemSub">${esc(x.report_items?.zone_name||x.report_items?.item_name||'')} / ${x.phase==='before'?'作業前':'作業後'} / 削除 ${fmtTime(x.deleted_at)}</div><button class="btn secondary small restorePhoto" data-id="${x.id}" style="margin-top:6px">復元</button></div>`).join('')||'<div class="help">空です</div>'}</div></section>`;$$('.restoreReport').forEach(x=>x.onclick=async()=>{await dbUpdate('reports',{deleted_at:null,deleted_by:null,updated_at:now()},{id:x.dataset.id});await logAction(x.dataset.id,'restore_report',{});await loadCore(true);drawAdmin('trash')});$$('.restorePhoto').forEach(x=>x.onclick=async()=>{const ph=(pp.data||[]).find(y=>y.id===x.dataset.id);await dbUpdate('photos',{deleted_at:null,deleted_by:null},{id:x.dataset.id});await logAction(ph?.report_items?.report_id||null,'restore_photo',{photo_id:x.dataset.id});drawAdmin('trash')})}else if(tab==='export'){b.innerHTML=`<section class="card"><h3 class="sectionTitle">データ出力</h3><div class="grid2"><div class="field"><label>開始日</label><input id="exFrom" type="date"></div><div class="field"><label>終了日</label><input id="exTo" type="date"></div></div><div class="field" style="margin-top:8px"><label>マンション（空欄=全部）</label><input id="exProp" placeholder="検索文字"></div><div class="row" style="margin-top:10px"><button id="csvBtn" class="btn primary">CSV</button><button id="jsonBtn" class="btn secondary">バックアップJSON</button><button id="zipBtn" class="btn secondary">報告書PDF ZIP</button></div><div class="notice" style="margin-top:9px">日付・マンションで絞り込んで一括出力できます。PDF ZIPは件数が多いとiPhoneで時間がかかります。</div></section>`;$('#csvBtn').onclick=exportCSV;$('#jsonBtn').onclick=exportJSON;$('#zipBtn').onclick=exportPdfZip}}
 
-      <section class="card">
-        <div class="section-title"><h3>未振り分け</h3><span class="muted">${currentReport.unassignedIds.length}枚</span></div>
-        ${currentReport.unassignedIds.length ? `
-          <div class="photo-toolbar">
-            <div class="field"><label>項目</label><select id="assignItem">${currentReport.items.map(i=>`<option value="${i.id}">${escapeHtml(i.name)}</option>`).join('')}</select></div>
-            <div class="field"><label>区分</label><select id="assignPhase"><option value="before">作業前</option><option value="after">作業後</option></select></div>
-            <button id="assignBtn" class="primary-btn assign-btn" type="button">選択写真を振り分け</button>
-          </div>
-          <div class="toolbar" style="margin-bottom:10px">
-            <button id="selectAllBtn" class="small-btn" type="button">全選択</button>
-            <button id="clearSelectBtn" class="small-btn" type="button">選択解除</button>
-          </div>
-          <div id="unassignedGrid" class="photo-grid">
-            ${currentReport.unassignedIds.map((pid,idx)=>`
-              <label class="photo-card" data-pid="${pid}">
-                <input class="photo-check" type="checkbox" value="${pid}">
-                <img src="${urlMap.get(pid)||''}" alt="未振り分け写真 ${idx+1}">
-                <span class="badge">${idx+1}</span>
-              </label>`).join('')}
-          </div>` : '<div class="empty">未振り分け写真はありません。</div>'}
-      </section>
+function exportFilteredReports(){const f=$('#exFrom')?.value||'',t=$('#exTo')?.value||'',q=($('#exProp')?.value||'').trim().toLowerCase();return state.reports.filter(r=>r.status==='done'&&(!f||r.work_date>=f)&&(!t||r.work_date<=t)&&(!q||(r.properties?.name||'').toLowerCase().includes(q)))}
+async function exportCSV(){try{const fin=await adminInvoke({action:'finance',from:$('#exFrom')?.value||null,to:$('#exTo')?.value||null,property_query:$('#exProp')?.value||''});const rows=(fin.rows||[]).map(r=>[r.work_date,r.properties?.name||'',r.room_no,(r.workers||[]).join('・'),(r.report_tasks||[]).map(x=>x.item_name).join(' / '),r.amount||0,r.completed_at||'']);const head=['作業日','マンション','部屋','担当者','作業項目','発注金額','完了日時'];const csv=[head,...rows].map(a=>a.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');downloadBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),`作業報告_${today()}.csv`)}catch(e){alert(e.message)}}
+async function exportJSON(){try{const fin=await adminInvoke({action:'finance',from:$('#exFrom')?.value||null,to:$('#exTo')?.value||null,property_query:$('#exProp')?.value||''});const data={exported_at:now(),count:fin.count,total:fin.total,reports:fin.rows||[]};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),`作業報告バックアップ_${today()}.json`)}catch(e){alert(e.message)}}
+function downloadBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500)}
+async function ensureJSZip(){if(window.JSZip)return;await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+async function exportDetail(id){const q=await sb.from('reports').select('*,properties(name,address),report_workers(user_id,profiles(display_name,login_id)),report_tasks(*)').eq('id',id).single();if(q.error)throw q.error;const r=q.data,{data:i}=await sb.from('report_items').select('*').eq('report_id',id).order('sort_no');const {data:p}=await sb.from('photos').select('*').in('report_item_id',(i||[]).map(x=>x.id)).is('deleted_at',null);r.items=i||[];r.photos=p||[];for(const ph of r.photos)ph._url=await photoUrl(ph);return r}
+function pdfNode(r){const el=document.createElement('div');el.className='paper';el.style.position='fixed';el.style.left='-10000px';el.style.top='0';el.style.width='794px';const tasks=[...(r.report_tasks||[])].sort((a,b)=>(a.sort_no||0)-(b.sort_no||0));const sections=tasks.map(t=>{const its=(r.items||[]).filter(i=>i.task_id===t.id).sort((a,b)=>(a.sort_no||0)-(b.sort_no||0));return `<section style="margin-top:14px"><div style="font-size:15px;font-weight:900;background:#eef2f5;border-left:4px solid #1c3c50;padding:6px 8px;margin-bottom:7px">${esc(t.item_name)}</div>${its.map(i=>{const b=photoFor(r,i.id,'before'),a=photoFor(r,i.id,'after'),label=i.zone_name||i.item_name;return `<div class="pdfPair"><div class="pdfCell"><b>${esc(label)}　作業前</b><img src="${b?b._url||'':''}"></div><div class="pdfCell"><b>${esc(label)}　作業後</b><img src="${a?a._url||'':''}"></div></div>`}).join('')}</section>`}).join('');el.innerHTML=`<div class="pdfTitle">作業報告書</div><div class="pdfMeta"><div><b>マンション：</b>${esc(r.properties?.name||'')}</div><div><b>部屋：</b>${esc(r.room_no)}号室</div><div><b>作業日：</b>${fmtDate(r.work_date)}</div><div><b>担当：</b>${esc(workerName(r))}</div></div>${sections}`;document.body.appendChild(el);return el}
+async function waitImages(el){await Promise.all([...el.querySelectorAll('img')].map(img=>img.complete?Promise.resolve():new Promise(res=>{img.onload=img.onerror=res})))}
+async function exportPdfZip(){const rows=exportFilteredReports();if(!rows.length)return say('対象の報告書がありません');if(rows.length>60&&!confirm(`${rows.length}件あります。iPhoneでは時間がかかる可能性があります。続けますか？`))return;try{await ensureJSZip();const zip=new JSZip();let i=0;for(const x of rows){i++;say(`PDF作成 ${i}/${rows.length}`);const r=await exportDetail(x.id),el=pdfNode(r);await waitImages(el);const blob=await html2pdf().set({margin:0,image:{type:'jpeg',quality:.92},html2canvas:{scale:1.4,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).from(el).toPdf().outputPdf('blob');el.remove();const safe=(r.properties?.name||'報告書').replace(/[\\/:*?"<>|]/g,'_'),room=String(r.room_no||'').replace(/[\\/:*?"<>|]/g,'_');zip.file(`${safe}/${r.work_date}/${room}号室_報告書.pdf`,blob)}const out=await zip.generateAsync({type:'blob'});downloadBlob(out,`報告書一括_${today()}.zip`);say('ZIPを作成しました')}catch(e){alert('一括PDF作成に失敗しました：'+e.message)}}
+async function createUser(){const id=prompt('ログインID');if(!id)return;const pw=prompt('初期パスワード（8文字以上）');if(!pw)return;const admin=confirm('管理者として作成しますか？\nOK=管理者 / キャンセル=作業者');const name=admin?'':prompt('担当者名（空欄なら初回ログイン時に本人が入力）')||'';try{await adminInvoke({action:'create',login_id:id,password:pw,role:admin?'admin':'worker',display_name:name});say('ユーザーを作成しました');drawAdmin('users')}catch(e){alert(e.message)}}
+async function editUser(el,u){const x=prompt(`1: 有効/停止\n2: 権限切替\n3: パスワード変更\n4: 名前変更\n5: ログインID変更`);try{if(x==='1')await adminInvoke({action:'update',user_id:u.id,active:!u.active});else if(x==='2')await adminInvoke({action:'update',user_id:u.id,role:u.role==='admin'?'worker':'admin'});else if(x==='3'){const p=prompt('新しいパスワード（8文字以上）');if(p)await adminInvoke({action:'update',user_id:u.id,password:p})}else if(x==='4'){const n=prompt('名前',u.display_name||'');if(n!==null)await adminInvoke({action:'update',user_id:u.id,display_name:n})}else if(x==='5'){const id=prompt('新しいID',u.login_id||'');if(id)await adminInvoke({action:'update',user_id:u.id,login_id:id})}else return;drawAdmin('users')}catch(e){alert(e.message)}}
 
-      ${currentReport.items.map(item=>`
-        <section class="card">
-          <div class="section-title"><h3>${escapeHtml(item.name)}</h3><span class="muted">${item.beforeIds.length} + ${item.afterIds.length}枚</span></div>
-          <div class="phase-columns">
-            ${phaseBoxHtml(item,'before','作業前',urlMap)}
-            ${phaseBoxHtml(item,'after','作業後',urlMap)}
-          </div>
-        </section>`).join('')}
-
-      <div class="sticky-actions no-print">
-        <button id="itemsBackBtn" class="ghost-btn" type="button">項目選択へ</button>
-        <button id="previewBtn" class="primary-btn" type="button">確認・PDFへ</button>
-      </div>`;
-
-    document.getElementById('photoInput').addEventListener('change',handlePhotoUpload);
-    const assignBtn=document.getElementById('assignBtn');
-    if(assignBtn) assignBtn.addEventListener('click',assignSelected);
-    document.getElementById('selectAllBtn')?.addEventListener('click',()=>document.querySelectorAll('.photo-check').forEach(x=>{x.checked=true;x.closest('.photo-card').classList.add('selected');}));
-    document.getElementById('clearSelectBtn')?.addEventListener('click',()=>document.querySelectorAll('.photo-check').forEach(x=>{x.checked=false;x.closest('.photo-card').classList.remove('selected');}));
-    document.querySelectorAll('.photo-check').forEach(x=>x.addEventListener('change',()=>x.closest('.photo-card').classList.toggle('selected',x.checked)));
-    document.querySelectorAll('[data-move]').forEach(b=>b.addEventListener('click',()=>movePhoto(b.dataset.item,b.dataset.phase,b.dataset.pid,Number(b.dataset.move))));
-    document.querySelectorAll('[data-unassign]').forEach(b=>b.addEventListener('click',()=>unassignPhoto(b.dataset.item,b.dataset.phase,b.dataset.pid)));
-    document.getElementById('itemsBackBtn').addEventListener('click',renderItems);
-    document.getElementById('previewBtn').addEventListener('click',renderPreview);
-  }
-
-  function phaseBoxHtml(item,phase,label,urlMap){
-    const ids=phase==='before'?item.beforeIds:item.afterIds;
-    return `<div class="phase-box">
-      <div class="phase-head"><strong>${label}</strong><span class="muted">${ids.length}枚</span></div>
-      ${ids.length ? ids.map((pid,idx)=>`
-        <div class="phase-photo">
-          <img src="${urlMap.get(pid)||''}" alt="${escapeHtml(item.name)} ${label} ${idx+1}">
-          <div>
-            <div class="help">No. ${idx+1}</div>
-            <div class="controls">
-              <button class="small-btn" type="button" data-move="-1" data-item="${item.id}" data-phase="${phase}" data-pid="${pid}" ${idx===0?'disabled':''}>↑</button>
-              <button class="small-btn" type="button" data-move="1" data-item="${item.id}" data-phase="${phase}" data-pid="${pid}" ${idx===ids.length-1?'disabled':''}>↓</button>
-              <button class="small-btn" type="button" data-unassign="1" data-item="${item.id}" data-phase="${phase}" data-pid="${pid}">未振り分けへ</button>
-            </div>
-          </div>
-        </div>`).join('') : '<div class="empty">まだありません</div>'}
-    </div>`;
-  }
-
-  async function handlePhotoUpload(e){
-    const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
-    if(!files.length) return;
-    showToast(`${files.length}枚を保存中…`);
-    for(const file of files){
-      const pid=id('photo');
-      await put(stores.photos,{id:pid,reportId:currentReport.id,blob:file,name:file.name,type:file.type,createdAt:new Date().toISOString()});
-      currentReport.unassignedIds.push(pid);
-    }
-    await saveReport(); await renderPhotos(); showToast(`${files.length}枚追加しました`);
-  }
-
-  async function assignSelected(){
-    const selected=[...document.querySelectorAll('.photo-check:checked')].map(x=>x.value);
-    if(!selected.length){ showToast('写真を選択してください'); return; }
-    const itemId=document.getElementById('assignItem').value;
-    const phase=document.getElementById('assignPhase').value;
-    const item=currentReport.items.find(i=>i.id===itemId);
-    if(!item) return;
-    const target=phase==='before'?item.beforeIds:item.afterIds;
-    selected.forEach(pid=>{ if(!target.includes(pid)) target.push(pid); });
-    currentReport.unassignedIds=currentReport.unassignedIds.filter(pid=>!selected.includes(pid));
-    await saveReport(); await renderPhotos(); showToast(`${selected.length}枚を振り分けました`);
-  }
-
-  async function movePhoto(itemId,phase,pid,delta){
-    const item=currentReport.items.find(i=>i.id===itemId); if(!item) return;
-    const arr=phase==='before'?item.beforeIds:item.afterIds; const i=arr.indexOf(pid), j=i+delta;
-    if(i<0||j<0||j>=arr.length) return;
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-    await saveReport(); await renderPhotos();
-  }
-  async function unassignPhoto(itemId,phase,pid){
-    const item=currentReport.items.find(i=>i.id===itemId); if(!item) return;
-    const arr=phase==='before'?item.beforeIds:item.afterIds;
-    const i=arr.indexOf(pid); if(i>=0) arr.splice(i,1);
-    if(!currentReport.unassignedIds.includes(pid)) currentReport.unassignedIds.push(pid);
-    await saveReport(); await renderPhotos();
-  }
-
-  async function renderPreview(){
-    if(!currentReport) return;
-    revokeUrls();
-    const ids=currentReport.items.flatMap(i=>[...i.beforeIds,...i.afterIds]);
-    const urlMap=new Map(await Promise.all(ids.map(async pid=>[pid,await photoUrl(pid)])));
-    const sections=currentReport.items.map(item=>{
-      const n=Math.max(item.beforeIds.length,item.afterIds.length,1);
-      const rows=Array.from({length:n},(_,idx)=>{
-        const b=item.beforeIds[idx], a=item.afterIds[idx];
-        return `<div class="pair-row">
-          ${reportSlot(b,urlMap,`${item.name} 作業前 ${idx+1}`)}
-          ${reportSlot(a,urlMap,`${item.name} 作業後 ${idx+1}`)}
-        </div>`;
-      }).join('');
-      return `<section class="report-section">
-        <h3>${escapeHtml(item.name)}</h3>
-        <div class="before-after-labels"><div>作業前</div><div>作業後</div></div>
-        ${rows}
-      </section>`;
-    }).join('');
-    view.innerHTML=`
-      ${stepper(3)}
-      <section class="card no-print">
-        <div class="section-title"><h2>PDFプレビュー</h2><span class="muted">作業前・作業後を同じ段で比較</span></div>
-        <div class="notice">PDFボタンでA4縦のPDFを生成します。写真枚数が多い場合は自動で複数ページになります。</div>
-      </section>
-      <div class="preview-shell">
-        <article id="pdfRoot" class="report-paper">
-          <div class="report-title">作業報告書</div>
-          <div class="report-info">
-            <div><strong>物件名：</strong>${escapeHtml(currentReport.propertyName)}</div>
-            <div><strong>作業日：</strong>${fmtDate(currentReport.workDate)}</div>
-            <div><strong>作成日時：</strong>${escapeHtml(fmtDateTime(currentReport.createdAt))}</div>
-            <div><strong>最終更新：</strong>${escapeHtml(fmtDateTime(currentReport.updatedAt))}</div>
-          </div>
-          ${sections}
-        </article>
-      </div>
-      <div class="sticky-actions no-print">
-        <button id="photosBackBtn" class="ghost-btn" type="button">写真へ戻る</button>
-        <button id="printBtn" class="secondary-btn" type="button">印刷</button>
-        <button id="pdfBtn" class="primary-btn" type="button">PDFを作成</button>
-      </div>`;
-    document.getElementById('photosBackBtn').addEventListener('click',renderPhotos);
-    document.getElementById('printBtn').addEventListener('click',()=>window.print());
-    document.getElementById('pdfBtn').addEventListener('click',createPdf);
-  }
-
-  function reportSlot(pid,urlMap,alt){
-    return pid
-      ? `<div class="report-photo-slot"><img src="${urlMap.get(pid)||''}" alt="${escapeHtml(alt)}"></div>`
-      : `<div class="report-photo-slot missing">写真なし</div>`;
-  }
-
-  async function createPdf(){
-    const el=document.getElementById('pdfRoot');
-    const filename=`${currentReport.propertyName}_${currentReport.workDate}_作業報告書.pdf`.replace(/[\\/:*?"<>|]/g,'_');
-    if(typeof window.html2pdf!=='function'){
-      showToast('PDFライブラリ未読込のため印刷画面を開きます');
-      window.print(); return;
-    }
-    const btn=document.getElementById('pdfBtn'); btn.disabled=true; btn.textContent='PDF作成中…';
-    try{
-      await window.html2pdf().set({
-        margin:[8,8,8,8],
-        filename,
-        image:{type:'jpeg',quality:.92},
-        html2canvas:{scale:1.7,useCORS:true,logging:false},
-        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-        pagebreak:{mode:['css','legacy']}
-      }).from(el).save();
-      showToast('PDFを作成しました');
-    }catch(err){
-      console.error(err); showToast('PDF作成に失敗しました。印刷をお試しください');
-    }finally{
-      btn.disabled=false; btn.textContent='PDFを作成';
-    }
-  }
-
-  async function openReport(reportId){
-    const r=await getOne(stores.reports,reportId); if(!r) return;
-    const p=await getOne(stores.properties,r.propertyId);
-    currentReport=r;
-    currentReport.templateItems=currentReport.templateItems || p?.items || currentReport.items.map(i=>i.name);
-    await renderPhotos();
-  }
-
-  async function deleteReport(reportId){
-    if(!confirm('この報告書と保存写真を削除しますか？')) return;
-    const photos=await getPhotosForReport(reportId);
-    for(const p of photos) await del(stores.photos,p.id);
-    await del(stores.reports,reportId);
-    showToast('削除しました'); renderHome();
-  }
-
-  async function renderTemplates(){
-    viewMode='templates'; currentReport=null; revokeUrls();
-    const props=(await getAll(stores.properties)).sort((a,b)=>a.name.localeCompare(b.name,'ja'));
-    view.innerHTML=`
-      <section class="card">
-        <div class="section-title"><h2>物件テンプレート</h2><button id="addPropertyBtn" class="primary-btn" type="button">＋ 物件を追加</button></div>
-        <div class="help" style="margin-bottom:12px">物件ごとに、普段使う作業項目を登録します。報告書作成時はここから自動で候補を出します。</div>
-        <div class="list">
-          ${props.map(p=>`
-            <div class="report-row">
-              <div class="meta">
-                <div class="title">${escapeHtml(p.name)}</div>
-                <div class="sub">${escapeHtml((p.items||[]).join(' ／ ') || '作業項目なし')}</div>
-              </div>
-              <div class="toolbar">
-                <button class="small-btn edit-property" data-id="${p.id}" type="button">編集</button>
-                <button class="small-btn danger-btn delete-property" data-id="${p.id}" type="button">削除</button>
-              </div>
-            </div>`).join('')}
-        </div>
-      </section>`;
-    document.getElementById('addPropertyBtn').addEventListener('click',()=>renderPropertyEditor());
-    document.querySelectorAll('.edit-property').forEach(b=>b.addEventListener('click',()=>renderPropertyEditor(b.dataset.id)));
-    document.querySelectorAll('.delete-property').forEach(b=>b.addEventListener('click',()=>deleteProperty(b.dataset.id)));
-  }
-
-  async function renderPropertyEditor(propertyId){
-    const p=propertyId ? await getOne(stores.properties,propertyId) : {
-      id:id('property'),name:'',address:'',items:['基本清掃','家具家電対応','給水部品修理','台所床鳴り補修','玄関床CF']
-    };
-    view.innerHTML=`
-      <section class="card">
-        <h2>${propertyId?'物件テンプレート編集':'物件テンプレート追加'}</h2>
-        <div class="grid-2">
-          <div class="field"><label for="propName">マンション名</label><input id="propName" type="text" value="${escapeHtml(p.name)}" placeholder="例：○○マンション"></div>
-          <div class="field"><label for="propAddress">住所（任意）</label><input id="propAddress" type="text" value="${escapeHtml(p.address||'')}" placeholder="報告書には現在表示しません"></div>
-        </div>
-        <div class="field" style="margin-top:14px">
-          <label for="propItems">作業項目</label>
-          <textarea id="propItems" placeholder="1行に1項目">${escapeHtml((p.items||[]).join('\n'))}</textarea>
-          <div class="help">1行に1項目。例：基本清掃、家具家電対応、玄関床CF など。</div>
-        </div>
-        <div class="sticky-actions">
-          <button id="cancelPropBtn" class="ghost-btn" type="button">キャンセル</button>
-          <button id="savePropBtn" class="primary-btn" type="button">保存</button>
-        </div>
-      </section>`;
-    document.getElementById('cancelPropBtn').addEventListener('click',renderTemplates);
-    document.getElementById('savePropBtn').addEventListener('click',async()=>{
-      const name=document.getElementById('propName').value.trim();
-      if(!name){ showToast('マンション名を入力してください'); return; }
-      p.name=name; p.address=document.getElementById('propAddress').value.trim();
-      p.items=[...new Set(document.getElementById('propItems').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean))];
-      p.createdAt=p.createdAt||new Date().toISOString(); p.updatedAt=new Date().toISOString();
-      await put(stores.properties,p); showToast('保存しました'); renderTemplates();
-    });
-  }
-
-  async function deleteProperty(propertyId){
-    const reports=await getAll(stores.reports);
-    if(reports.some(r=>r.propertyId===propertyId)){
-      showToast('この物件の報告書があるため削除できません'); return;
-    }
-    if(!confirm('この物件テンプレートを削除しますか？')) return;
-    await del(stores.properties,propertyId); renderTemplates();
-  }
-
-  homeBtn.addEventListener('click',renderHome);
-  window.addEventListener('beforeunload',revokeUrls);
-
-  (async function init(){
-    try{
-      db=await openDb(); await seed(); await renderHome();
-      if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-        navigator.serviceWorker.register('./sw.js').catch(()=>{});
-      }
-    }catch(err){
-      console.error(err);
-      view.innerHTML=`<section class="card"><h2>起動できませんでした</h2><p class="help">ブラウザの保存機能を利用できません。Safari / Chrome / Edge の通常モードで開いてください。</p></section>`;
-    }
-  })();
+// --- Init ---------------------------------------------------------------
+async function init(){await openODB();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});const {data:{session:s}}=await sb.auth.getSession();session=s;if(session)await afterAuth();else await renderLogin()}
+sb.auth.onAuthStateChange((ev,s)=>{session=s;if(ev==='SIGNED_OUT')renderLogin()});init().catch(e=>{console.error(e);document.body.innerHTML=`<div class="loginWrap"><div class="loginCard"><h1>起動エラー</h1><div class="notice danger">${esc(e.message)}</div><button class="btn ghost" onclick="location.reload()" style="margin-top:10px">再読み込み</button></div></div>`});
 })();
-
 </script>
 </body>
 </html>
